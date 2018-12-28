@@ -6,7 +6,7 @@ package sys
 
 import (
 	"fmt"
-	"github.com/spekary/goradd/pkg/sys"
+	"github.com/goradd/gofile/pkg/sys"
 	"io"
 	"os"
 	"path/filepath"
