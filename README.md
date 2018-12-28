@@ -42,6 +42,9 @@ gofile <command> <args...> [options]
 ```
 
 ## Commands
+
+With most of the following commands, -v will output status information while gofile is running.
+
 ### Help
 ```bash
 gofile -h
@@ -54,7 +57,7 @@ Copies a file or directory to another file or directory.
 
 Usage:
 ```bash
-gofile copy <src> <dest> [-x excludes...]
+gofile copy [-x excludes...] <src> <dest> 
 ```
 -x specifies names of files or directories you want to exclude from the source. This is useful when
 expanding a directory using '*'.
@@ -65,7 +68,7 @@ Runs go generate on the given file.
 
 Usage:
 ```bash
-gofile generate <sources...> [-x excludes...]
+gofile generate [-x excludes...] <sources...>
 
 ```
 
@@ -87,12 +90,11 @@ Deletes the named directories or files.
 
 Usage:
 ```bash
-gofile remove <dest...> [-x excludes...]
+gofile remove [-x excludes...] <dest...> 
 ```
 
 -x specifies names of files or directories you want to exclude from the destination. This is useful when
 expanding a directory using '*'.
 
--v will output status information while gofile is running.
 
 
