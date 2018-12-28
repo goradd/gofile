@@ -1,18 +1,11 @@
 package main
 
 import (
-	"github.com/spekary/gofile/internal/cmd"
-	"log"
+	"github.com/spekary/gofile/exec"
 )
 
 
 func main() {
-	rootCmd := cmd.MakeRootCommand()
-
-	err := rootCmd.Execute()
-
-	if err != nil {
-		log.Fatal(err)
-	}
+	exec.Execute()
 }
 
