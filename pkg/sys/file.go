@@ -6,7 +6,6 @@ package sys
 
 import (
 	"fmt"
-	"github.com/goradd/gofile/pkg/sys"
 	"io"
 	"os"
 	"path/filepath"
@@ -45,7 +44,7 @@ func ModuleExpandFileList(args []string, modules map[string]string) (list []stri
 
 	for _,arg := range args {
 		arg = os.ExpandEnv(arg)
-		arg, _ = sys.GetModulePath(arg, modules)
+		arg, _ = GetModulePath(arg, modules)
 		var files []string
 		if hasMeta(arg) {
 			files, _ = filepath.Glob(arg)
