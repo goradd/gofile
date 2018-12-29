@@ -20,13 +20,13 @@ func TestModules(t *testing.T) {
 		return
 	}
 
-	newPath, err := GetModulePath("github.com/spekary/gofile/modules", modules)
+	newPath, err := GetModulePath("github.com/goradd/gofile/modules", modules)
 	if err != nil {
 		t.Fatal(err)
 		return
 	}
 
-	if newPath == "github.com/spekary/gofile/modules" {
+	if newPath == "github.com/goradd/gofile/modules" {
 		t.Error("Module path was not changed to an absolute path")
 	}
 }

@@ -234,8 +234,8 @@ func TestModuleExpandFileList(t *testing.T) {
 	}
 
 	fileList := []string{
-		"github.com/spekary/gofile/*.md", // readme file
-		"github.com/spekary/gofile/LICENSE",
+		"github.com/goradd/gofile/*.md", // readme file
+		"github.com/goradd/gofile/LICENSE",
 		"/a/b/c", // non-existant items should be left alone
 	}
 	l := ModuleExpandFileList(fileList, modules)
@@ -244,7 +244,7 @@ func TestModuleExpandFileList(t *testing.T) {
 		t.Error("Not the correct list size.")
 	}
 
-	if listContains(l, "github.com/spekary/gofile/test1") {
+	if listContains(l, "github.com/goradd/gofile/test1") {
 		t.Error("Item 1 was not changed.")
 	}
 

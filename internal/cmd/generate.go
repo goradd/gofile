@@ -6,7 +6,7 @@ package cmd
 
 import (
 	"fmt"
-	"github.com/spekary/gofile/pkg/sys"
+	"github.com/goradd/gofile/pkg/sys"
 	"github.com/spf13/cobra"
 )
 

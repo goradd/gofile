@@ -1,7 +1,7 @@
 package exec
 
 import (
-	"github.com/spekary/gofile/internal/cmd"
+	"github.com/goradd/gofile/internal/cmd"
 	"log"
 )
 

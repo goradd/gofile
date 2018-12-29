@@ -1,7 +1,7 @@
 package main
 
 import (
-	"github.com/spekary/gofile/exec"
+	"github.com/goradd/gofile/exec"
 )
 
 

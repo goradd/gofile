@@ -19,7 +19,7 @@ file to temporarily point the module to different location on your disk. For exa
 will change where the go build system will look for the gofile source:
 
 `
-replace github.com/spekary/gofile => ../gofile-src // to work with a local version of goradd
+replace github.com/goradd/gofile => ../gofile-src // to work with a local version of gofile
 `
 
 However, this can pose other problems if your build system is copying files out of one of these modules. If you use
@@ -27,7 +27,7 @@ the GOPATH environment variable in your build scripts to locate a module, it wil
 made in the go.mod file. Gofile solves this problem by substituting a module name for its disk location. For example,
 
 `
-gofile copy github.com/spekary/gofile/README.md /a/b/
+gofile copy github.com/goradd/gofile/README.md /a/b/
 `
 will copy this README file to the /a/b/ directory on your disk, even if you have changed the location of the gofile
 module using a replace statement. Gofile looks for the go.mod file by searching for it in the current working directory,
