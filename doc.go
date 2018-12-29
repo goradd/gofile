@@ -9,5 +9,6 @@ substituted for the module name.
 Gofile exports the ModulePaths() function as a library so you can build your own module aware tools.
 
 For complete documentation of the command-line tool, see the README file.
+
  */
 package main
