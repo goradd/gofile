@@ -36,8 +36,15 @@ gofile's control.
 
 Gofile exports the ModulePaths() function as a library so you can build your own module aware tools. 
 
-Usage:
-```bash
+## Installation
+
+```shell
+go get github.com/goradd/gofile/...
+```
+
+## Usage
+
+```shell
 gofile <command> <args...> [options] 
 ```
 
@@ -46,7 +53,7 @@ gofile <command> <args...> [options]
 With most of the following commands, -v will output status information while gofile is running.
 
 ### Help
-```bash
+```shell
 gofile -h
 ```
 
@@ -56,7 +63,7 @@ will print a complete description of the options and arguments of gofile.
 Copies a file or directory to another file or directory.
 
 Usage:
-```bash
+```shell
 gofile copy [-x excludes...] <src> <dest> 
 ```
 -x specifies names of files or directories you want to exclude from the source. This is useful when
@@ -67,7 +74,7 @@ expanding a directory using '*'.
 Runs go generate on the given file.
 
 Usage:
-```bash
+```shell
 gofile generate [-x excludes...] <sources...>
 
 ```
@@ -80,7 +87,7 @@ expanding a directory using '*'.
 Creates the named directory if it does not exist. Sets it to be writable.
 
 Usage:
-```bash
+```shell
 gofile mkdir <dest>
 ```
 
@@ -89,7 +96,7 @@ gofile mkdir <dest>
 Deletes the named directories or files.
 
 Usage:
-```bash
+```shell
 gofile remove [-x excludes...] <dest...> 
 ```
 
