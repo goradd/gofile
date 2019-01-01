@@ -39,7 +39,7 @@ Gofile exports the ModulePaths() function as a library so you can build your own
 ## Installation
 
 ```shell
-go get github.com/goradd/gofile/...
+go get -u github.com/goradd/gofile/...
 ```
 
 ## Usage
