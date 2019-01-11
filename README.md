@@ -52,6 +52,18 @@ gofile <command> <args...> [options]
 
 With most of the following commands, -v will output status information while gofile is running.
 
+-x specifies what to exclude when expanding a path that uses * or ? expansions. Note that the * pattern
+does not match the path separator, so it only expands one level deep. The exclude pattern can include wild
+cards like * and ?, but it will only compare against the last item in a path. For example, if you have
+the following directories in the /tmp directory:
+
+- test1
+- test2
+
+Then specifying `-x test2 /tmp/*` will result in only /tmp/test1 being used.
+
+-o will force 
+
 ### Help
 ```shell
 gofile -h
@@ -64,10 +76,15 @@ Copies a file or directory to another file or directory.
 
 Usage:
 ```shell
-gofile copy [-x excludes...] <src> <dest> 
+gofile copy [-x excludes...] [-o|-n] <src> <dest> 
 ```
 -x specifies names of files or directories you want to exclude from the source. This is useful when
 expanding a directory using '*'.
+
+Normally, a previously existing file will not be overwritten, and a previously existing directory will not be
+deleted first but rather files will be added that are not present in the directory. The -o option will force
+an overwrite of previously existing files, and the -n option will overwrite only if the new file is newer than
+the old one. If you want to replace a previously existing directory, use the remove command described below first.
 
 ### Generate
 

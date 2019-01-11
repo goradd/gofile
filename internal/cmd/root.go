@@ -97,19 +97,21 @@ func processExclude(cmd *cobra.Command, args []string) {
 func processFileListArgs(cmd *cobra.Command, args []string) {
 	files2 := sys.ModuleExpandFileList(args, modules)
 
-	if excludes == nil || files == nil {
+	if excludes == nil {
 		files = files2
 		return
 	}
 
 	files = nil
+Files2:
 	for _, f := range files2 {
 		for _,e := range excludes {
-			m,_ := path.Match(e, f)
-			if !m {
-				files = append(files, f)
+			m,_ := path.Match(e, path.Base(f))
+			if m {
+				continue Files2
 			}
 		}
+		files = append(files, f)
 	}
 }
 

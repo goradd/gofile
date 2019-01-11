@@ -25,7 +25,7 @@ func copyFiles(cmd *cobra.Command, args []string) error {
 	} else if copyOverwriteIfNewer {
 		overwrite = sys.CopyOverwriteOnlyIfNewer
 	}
-	err := sys.CopyFiles(dest, overwrite, args...)
+	err := sys.CopyFiles(dest, overwrite, files...)
 
 	if err != nil {
 		return err
