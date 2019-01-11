@@ -5,4 +5,5 @@ go:
 
 script:
   - env GO111MODULE=on go install
-  - env GO111MODULE=on go test
+  - env GO111MODULE=on go test -v ./internal/cmd
+  - env GO111MODULE=on go test -v ./pkg/sys
