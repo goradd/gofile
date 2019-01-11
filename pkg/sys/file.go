@@ -197,12 +197,13 @@ func copyFileTo(src string, destDir string, name string, overwrite CopyOverwrite
 		// destination exists
 		if overwrite == CopyDoNotOverwrite {
 			return nil
-		}
-		modSrc := srcInfo.ModTime()
-		modDest := destInfo.ModTime()
+		} else if overwrite == CopyOverwriteOnlyIfNewer {
+			modSrc := srcInfo.ModTime()
+			modDest := destInfo.ModTime()
 
-		if modSrc.Before(modDest) && overwrite == CopyOverwriteOnlyIfNewer {
-			return nil
+			if modSrc.Before(modDest) || modSrc.Equal(modDest)  {
+				return nil
+			}
 		}
 
 		perm = destInfo.Mode() & os.ModePerm
