@@ -9,6 +9,7 @@ import (
 	"os"
 	"path/filepath"
 	"testing"
+	"time"
 )
 
 
@@ -32,6 +33,9 @@ func TestCopyFile(t *testing.T) {
 		t.Fatal(err)
 	}
 	dst := filepath.Join(dir, "test2.txt")
+
+	time.Sleep(2 * time.Second) // delay to make sure file is created later
+
 	err = CopyFiles(dst, CopyDoNotOverwrite, src)
 	if err != nil {
 		t.Fatal(err)
@@ -41,6 +45,8 @@ func TestCopyFile(t *testing.T) {
 	if string(bytes) != testContent {
 		t.Error("File content does not match")
 	}
+
+	time.Sleep(2 * time.Second) // delay to make sure file is created later
 
 	// test grow
 	testContent2 := "I am a test \n and the 2nd line\nand a 3rd"
