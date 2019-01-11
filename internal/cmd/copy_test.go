@@ -11,7 +11,7 @@ import (
 )
 
 
-func TestModules(t *testing.T) {
+func TestCopy(t *testing.T) {
 	dir := filepath.Join(os.TempDir(), "gofileTest")
 
 	cmd := MakeRootCommand()
@@ -25,24 +25,21 @@ func TestModules(t *testing.T) {
 		t.Error("Directory not created")
 	}
 
-	cmd.SetArgs([]string{"generate", "testdata/generateTestFile.go"})
+	cmd.SetArgs([]string{"copy", "-x", "b", "testdata/copytest/*", dir})
 	err = cmd.Execute()
 	if err != nil {
 		t.Error(err)
 	}
 
-	if string(generateResult) != "I am a test\n" {
-		t.Error("Go generate failed.")
-	}
-
-	cmd.SetArgs([]string{"copy", "testdata/generateTestFile.go", dir})
-	err = cmd.Execute()
-	if err != nil {
+	if _, err = os.Stat(filepath.Join(dir, "a", "t1.txt")); err != nil {
 		t.Error(err)
 	}
 
-	_, err = os.Stat(filepath.Join(dir, "generateTestFile.go"))
-	if err != nil {
+	if _, err = os.Stat(filepath.Join(dir, "b")); err == nil {
+		t.Error("Directory b was not supposed to be copied")
+	}
+
+	if _, err = os.Stat(filepath.Join(dir, "c")); err != nil {
 		t.Error(err)
 	}
 
