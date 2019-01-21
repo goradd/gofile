@@ -20,15 +20,57 @@ import (
 // The result is stdOut. If you get an error, you can cast err to (*exec.ExitError) and read the stdErr member to see
 // the error message that was generated.
 // The command string is the shell command, complete with all arguments.
+// To add string that has a space in it, enclose it in single or double quotes. Linux permits backslash escaped spaces, but that
+// will not work here, since a backslash represents something else in windows. However, quotes work in all OS's.
+// To include a quote character, use the other kind of quote. For example, to include a single quote, surround with double quotes.
+// This does not support recursive quotes. For that, you just will need to revert to the exec.Command function.
 func ExecuteShellCommand(command string) (result []byte, err error) {
-	parts := strings.Split(command, " ")
-	if len(parts) == 0 {
+	parts,err := splitCommandParts(command)
+	if len(parts) == 0 || err != nil {
 		return
 	}
 
 	cmd := exec.Command(parts[0], parts[1:]...)
 
 	result, err = cmd.Output()
+	return
+}
+
+func splitCommandParts(command string) (parts []string, err error) {
+	cur := command
+	for cur != "" {
+		i := strings.IndexAny(cur, ` '"`)
+		if i == -1 {
+			parts = append(parts, cur)
+			break
+		} else if cur[i] == ' ' {
+			parts = append(parts, cur[:i])
+			cur = cur[i+1:]
+		} else {
+			lookFor := cur[i:i+1]
+			i2 := strings.Index(cur[i+1:], lookFor)
+			if i2 == -1 {
+				// An error, an unterminated quote
+				err = fmt.Errorf("Unterminated quote at: %s", cur[i+1:])
+				return
+			}
+			var parts2 []string
+			parts2,err = splitCommandParts(cur[i+i2+2:])
+			next := cur[:i] + cur[i+1:i+i2+1]
+			if len(parts2) == 0 {
+				parts = append(parts, next)
+				return
+			} else {
+				next += parts2[0]
+				parts = append(parts, next)
+			}
+			if len(parts2) == 1 {
+				return
+			}
+			parts = append(parts, parts2[1:]...)
+			return
+		}
+	}
 	return
 }
 
