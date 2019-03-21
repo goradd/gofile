@@ -173,7 +173,7 @@ func CopyFiles(dst string, overwrite CopyOverwriteType, src... string) (err erro
 // copyTo copies the given file to the destination directory. If a name is given, it will rename the file.
 // It does no checks to see if the destination directory exists. If the file exists, it will
 // replace it using the same permission bits as the destination. If it doesn't exist, it will
-// duplicate the permission bits of the source.
+// use 644.
 // If the overwrite value would prevent the file from being copied, then the copy does not happen and
 // error is nil.
 func copyFileTo(src string, destDir string, name string, overwrite CopyOverwriteType) error {
@@ -209,7 +209,9 @@ func copyFileTo(src string, destDir string, name string, overwrite CopyOverwrite
 		perm = destInfo.Mode() & os.ModePerm
 	} else {
 		// destination does not exist
-		perm = srcInfo.Mode() & os.ModePerm
+		//perm = srcInfo.Mode() & os.ModePerm
+		perm = 0644
+
 	}
 
 	from, err := os.Open(src)
@@ -274,7 +276,7 @@ func copyTo(src string, destDir string, name string, overwrite CopyOverwriteType
 // If you want to replace the destination, delete it first. dst must exist.
 func CopyDirectory(src, dst string, overwrite CopyOverwriteType) (err error) {
 	dstInfo, dstErr := os.Stat(dst)
-	srcInfo, srcErr := os.Stat(src)
+	_, srcErr := os.Stat(src)
 
 	if srcErr != nil {
 		return fmt.Errorf("source directory error: %s", srcErr.Error())
@@ -303,8 +305,8 @@ func CopyDirectory(src, dst string, overwrite CopyOverwriteType) (err error) {
 			return fmt.Errorf("path %s is a directory in the source, but %s is a file in the destination", src, newPath)
 		}
 	} else {
-		perm := srcInfo.Mode().Perm()	// copy the permission
-		err = os.Mkdir(newPath, perm)
+		//perm := srcInfo.Mode().Perm()	// copy the permission
+		err = os.Mkdir(newPath, 0755)
 		if err != nil {
 			return fmt.Errorf("error creating directory %s: %s", newPath, err.Error())
 		}

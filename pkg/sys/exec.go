@@ -17,7 +17,7 @@ import (
 )
 
 // ExecuteShellCommand executes a shell command in the current working directory and returns its output, if any.
-// The result is stdOut. If you get an error, you can cast err to (*exec.ExitError) and read the stdErr member to see
+// The result is stdOut. If you get an error, you can cast err to (*exec.ExitError) and read the Stderr member to see
 // the error message that was generated.
 // The command string is the shell command, complete with all arguments.
 // To add string that has a space in it, enclose it in single or double quotes. Linux permits backslash escaped spaces, but that
