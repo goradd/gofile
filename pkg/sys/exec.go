@@ -51,7 +51,7 @@ func splitCommandParts(command string) (parts []string, err error) {
 			i2 := strings.Index(cur[i+1:], lookFor)
 			if i2 == -1 {
 				// An error, an unterminated quote
-				err = fmt.Errorf("Unterminated quote at: %s", cur[i+1:])
+				err = fmt.Errorf("unterminated quote at: %s", cur[i+1:])
 				return
 			}
 			var parts2 []string
@@ -106,7 +106,7 @@ func ModulePaths() (ret map[string]string, err error) {
 					if err == io.EOF {
 						break
 					}
-					return nil,fmt.Errorf("Error unpacking json from go list command.\n%s\n%s", string(outText), err.Error())
+					return nil,fmt.Errorf("error unpacking json from go list command.\n%s\n%s", string(outText), err.Error())
 				}
 				ret[v.Path] = v.Dir
 			}
@@ -115,7 +115,7 @@ func ModulePaths() (ret map[string]string, err error) {
 	} else {
 		// We don't have module support, so everything flows from top level locations
 		if outText, err = ExecuteShellCommand("go list -e -find -json all"); err != nil {
-			return nil,fmt.Errorf("Error executing shell command %s, %s", outText, err.Error())
+			return nil,fmt.Errorf("error executing shell command %s, %s", outText, err.Error())
 		}
 
 		root := runtime.GOROOT()	// we are going to remove built in packages
@@ -128,7 +128,7 @@ func ModulePaths() (ret map[string]string, err error) {
 					if err == io.EOF {
 						break
 					}
-					return nil,fmt.Errorf("Error unpacking json from go list command.\n%s\n%s", string(outText), err.Error())
+					return nil,fmt.Errorf("error unpacking json from go list command.\n%s\n%s", string(outText), err.Error())
 				}
 				if len(root) <= len(v.Dir) && v.Dir[:len(root)] != root { // exclude built-in packages
 					// truncate the path up to the top level. We have to try to preserve the same format we were given.
@@ -150,6 +150,10 @@ func ModulePaths() (ret map[string]string, err error) {
 func GetModulePath(path string, modules map[string]string) (newPath string, err error) {
 	for modPath,dir := range modules {
 		if len(modPath) <= len(path) && path[:len(modPath)] == modPath {	// if the path starts with a module path, replace it with the actual directory
+			if dir == "" {
+				err = fmt.Errorf("module %s is in the cache, but is not installed. Possibly you only installed its application? " +
+					"Install the module again using go get -u %[1]s", modPath)
+			}
 			path = filepath.Join(dir, path[len(modPath):])
 			break
 		}
