@@ -100,16 +100,22 @@ const (
 func CopyFiles(dst string, overwrite CopyOverwriteType, src... string) (err error) {
 	// Sanity checks
 	if dst == "" {
-		return fmt.Errorf("No destination specified.")
+		return fmt.Errorf("no destination specified")
 	}
 
 	if len(src) == 0 {
-		return fmt.Errorf("No source files specified.")
+		return fmt.Errorf("no source files specified")
 	}
 
 
 	dstInfo, destErr := os.Stat(dst)
-	if len(src) > 1 {
+	srcInfo, srcErr := os.Stat(src[0])
+
+	if srcErr != nil {
+		return fmt.Errorf("error with source: %s", srcErr.Error())
+	}
+
+	if len(src) > 1 || srcInfo.IsDir() {
 		if destErr != nil {
 			return destErr // path doesn't exist?
 		}
@@ -184,7 +190,7 @@ func copyFileTo(src string, destDir string, name string, overwrite CopyOverwrite
 		return srcErr
 	}
 	if srcInfo.IsDir() {
-		return fmt.Errorf("source is not a file")
+		return fmt.Errorf(`source "%s"" is not a file`, src)
 	}
 	var perm os.FileMode
 
