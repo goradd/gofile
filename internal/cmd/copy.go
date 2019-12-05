@@ -25,6 +25,14 @@ func copyFiles(cmd *cobra.Command, args []string) error {
 	} else if copyOverwriteIfNewer {
 		overwrite = sys.CopyOverwriteOnlyIfNewer
 	}
+
+	if len(files) == 0 {
+		if verbose {
+			fmt.Printf("No source files were specified in a copy operation.")
+		}
+		return nil
+	}
+
 	err := sys.CopyFiles(dest, overwrite, files...)
 
 	if err != nil {
