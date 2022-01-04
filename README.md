@@ -1,6 +1,6 @@
 # gofile
 
-Gofile is a simple file and directory manipulation tool primarily useful for building go applications. 
+Gofile is a simple file and directory manipulation tool primarily useful for building go applications and libraries. 
 
 Go is module and GOPATH aware, and is cross-platform. Any directory can be represented as a module name,
 followed by a subdirectory and the real path of the module will be substituted for 
@@ -9,7 +9,7 @@ environment variables into the path names using $VAR, or ${VAR} syntax.
 
 Gofile is particularly useful for making build scripts for open-source projects. The cross-platform feature allows
 you to create command-line scripts that will work on Windows and Unix based systems. The module aware feature
-allows you to specify a path relative to a modules location, simply by starting the path with the module specifier.
+allows you to specify a path relative to a module's location, simply by starting the path with the module specifier.
 If you are not working in Module-aware mode, it will use the GOPATH to locate packages instead.
 
 If you are using modules, there may be times when you would like to work on packages and modules that are in your

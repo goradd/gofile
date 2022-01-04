@@ -53,4 +53,39 @@ func TestCopy(t *testing.T) {
 
 }
 
+func TestSubCopy(t *testing.T) {
+	dir := filepath.Join(os.TempDir(), "gofileTest2")
 
+	cmd := MakeRootCommand()
+	cmd.SetArgs([]string{"mkdir", dir})
+	err := cmd.Execute()
+	if err != nil {
+		t.Error(err)
+	}
+	info,err := os.Stat(dir)
+	if err != nil || !info.IsDir() {
+		t.Error("Directory not created")
+	}
+
+	t.Logf("Copying testdata/emptyTest1/* to %s", dir)
+
+	cmd.SetArgs([]string{"copy", "testdata/emptyTest1/*", dir})
+	err = cmd.Execute()
+	if err != nil {
+		t.Error(err)
+	}
+
+	if _, err = os.Stat(filepath.Join(dir, "d", "t4.txt")); err != nil {
+		t.Error(err)
+	}
+
+	cmd.SetArgs([]string{"remove", dir})
+	err = cmd.Execute()
+
+	_,err = os.Stat(dir)
+	if err == nil {
+		t.Error("Directory not removed")
+	}
+
+
+}
