@@ -14,8 +14,12 @@ import (
 
 
 func TestCopyFile(t *testing.T) {
-	dir := filepath.Join(os.TempDir(), "gofileTest")
-	err := os.Mkdir(dir, 0777)
+	dir,err := os.UserCacheDir()
+	if err != nil {
+		dir = os.TempDir()
+	}
+	dir = filepath.Join(dir, "gofileTest")
+	err = os.Mkdir(dir, 0777)
 	if err != nil {
 		os.RemoveAll(dir)
 		t.Fatal(err)
