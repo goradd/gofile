@@ -7,8 +7,10 @@ package cmd
 import (
 	"github.com/goradd/gofile/pkg/sys"
 	"github.com/spf13/cobra"
+	"io/fs"
 	"os"
 	"path"
+	"path/filepath"
 )
 
 var excludes []string
@@ -18,6 +20,7 @@ var files []string
 var copyOverwrite bool
 var copyOverwriteIfNewer bool
 var verbose bool
+var deleteAfterZip bool
 
 func MakeRootCommand() *cobra.Command {
 	var err error
@@ -82,7 +85,17 @@ copying more than one file, the destination must be a directory that exists.`,
 		RunE: mkDir,
 	}
 
-	rootCmd.AddCommand(cmdRemove, cmdGenerate, cmdCopy, cmdMkDir)
+	var cmdGZip = &cobra.Command{
+		Use:   "gzip [files or directories to zip]",
+		Short: "GZip the given files or directories.",
+		Long: `GZips the given files, or all the files in given directories, placing zipped files alongside the given files, with .gz suffixes. Uses the maximum compression algorithm.`,
+		Args: cobra.MinimumNArgs(1),
+		PreRun: processExpandedFileListArgs,
+		RunE: gzip,
+	}
+	cmdGZip.Flags().BoolVarP(&deleteAfterZip, "delete", "d", false, "Zipped source files will be deleted, leaving only the zipped version.")
+
+	rootCmd.AddCommand(cmdRemove, cmdGenerate, cmdCopy, cmdMkDir, cmdGZip)
 
 	return rootCmd
 }
@@ -92,8 +105,10 @@ func processExclude(cmd *cobra.Command, args []string) {
 	excludes = sys.SplitList(exclude)
 }
 
+
 // processFileListArgs accepts the group of arguments that would represent files, directories
 // etc., processes them, removes excluded files, and sets the files global to this list
+// non-existent names are left intact so that we can create them.
 func processFileListArgs(cmd *cobra.Command, args []string) {
 	files2 := sys.ModuleExpandFileList(args, modules)
 
@@ -113,6 +128,52 @@ Files2:
 		}
 		files = append(files, f)
 	}
+}
+
+
+// processExistingFileListArgs accepts the group of arguments that would represent files, directories
+// etc., expands the list based on the current modules, expands directories to the list of files in those
+// directories, removes excluded files, and sets the files global to this list.
+// non-existent names are removed
+func processExpandedFileListArgs(cmd *cobra.Command, args []string) {
+	files2 := sys.ModuleExpandFileList(args, modules)
+
+	files = nil
+
+	for _, f := range files2 {
+		if sys.IsDir(f) {
+			_ = filepath.WalkDir(f, func(path string, d fs.DirEntry, err error) error {
+				if err == nil {
+					if d.IsDir() {
+						if isExcluded(path) {
+							return filepath.SkipDir
+						}
+					} else {
+						if !isExcluded(path) {
+							files = append(files, path)
+						}
+					}
+				}
+				return nil
+			});
+		} else {
+			if isExcluded(f) {
+				continue
+			}
+			files = append(files, f)
+		}
+	}
+}
+
+// isExcluded returns true if the given file matches one of the exclusion strings
+func isExcluded(file string) bool {
+	for _,e := range excludes {
+		m,_ := path.Match(e, path.Base(file))
+		if m {
+			return true
+		}
+	}
+	return false
 }
 
 func processFileArg(arg string) string {

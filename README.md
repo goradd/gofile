@@ -120,5 +120,24 @@ gofile remove [-x excludes...] <dest...>
 -x specifies names of files or directories you want to exclude from the destination. This is useful when
 expanding a directory using '*'.
 
+### GZip
 
+Compresses the given files.
 
+If a directory is specified, then the files inside that directory are individually
+compressed. This will recursively do the same to directories within the specified directory.
+
+Compressed files are placed in the same directory as the source file, and the
+file name is appended with ".gz"
+
+Usage:
+```shell
+gofile gzip [-d] [-x excludes...] <dest...> 
+```
+
+-x specifies names of files or directories you want to exclude from compression. For exmaple, 
+"-x *.txt" will prevent all files ending in ".txt" from being compressed. Specifying the name
+of a directory will exclude all the files within that directory.
+
+-d will delete the source file after being compressed. Excluded files specified in the 
+-x option are not deleted.

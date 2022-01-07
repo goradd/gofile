@@ -15,7 +15,7 @@ func TestCopy(t *testing.T) {
 	dir := filepath.Join(os.TempDir(), "gofileTest")
 
 	cmd := MakeRootCommand()
-	cmd.SetArgs([]string{"mkdir", dir})
+	cmd.SetArgs([]string{"mkdir", "-v", dir})
 	err := cmd.Execute()
 	if err != nil {
 		t.Error(err)
@@ -25,7 +25,7 @@ func TestCopy(t *testing.T) {
 		t.Error("Directory not created")
 	}
 
-	cmd.SetArgs([]string{"copy", "-x", "b", "testdata/copytest/*", dir})
+	cmd.SetArgs([]string{"copy", "-v", "-x", "b", "testdata/copytest/*", dir})
 	err = cmd.Execute()
 	if err != nil {
 		t.Error(err)
@@ -43,7 +43,7 @@ func TestCopy(t *testing.T) {
 		t.Error(err)
 	}
 
-	cmd.SetArgs([]string{"remove", dir})
+	cmd.SetArgs([]string{"remove", "-v", dir})
 	err = cmd.Execute()
 
 	_,err = os.Stat(dir)
@@ -69,7 +69,7 @@ func TestSubCopy(t *testing.T) {
 
 	t.Logf("Copying testdata/emptyTest1/* to %s", dir)
 
-	cmd.SetArgs([]string{"copy", "testdata/emptyTest1/*", dir})
+	cmd.SetArgs([]string{"copy", "-v", "testdata/emptyTest1/*", dir})
 	err = cmd.Execute()
 	if err != nil {
 		t.Error(err)

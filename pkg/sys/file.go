@@ -28,8 +28,9 @@ func SplitList(s string) (list []string) {
 	return
 }
 
-// Given a list of arguments that represent command line arguments that would be a list of
-// files, directories, or glob patterns, this will do the following:
+// ModuleExpandFileList will do the following given a list of arguments that represent command line arguments
+// that would be a list of
+// files, directories, or glob patterns:
 //   replace any environment variables with their values
 //   replace any items that start with a module with the actual location on disk
 //   expand any glob patterns
@@ -335,4 +336,15 @@ func CopyDirectory(src, dst string, overwrite CopyOverwriteType) (err error) {
 	}
 
 	return
+}
+
+// IsDir returns true if the given path exists and is a directory
+func IsDir(path string) bool {
+	dstInfo, err := os.Stat(path)
+	if err == nil { // file exists
+		if dstInfo.Mode().IsDir() {
+			return true
+		}
+	}
+	return false
 }
