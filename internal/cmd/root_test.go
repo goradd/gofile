@@ -10,7 +10,6 @@ import (
 	"testing"
 )
 
-
 func TestModules(t *testing.T) {
 	dir := filepath.Join(os.TempDir(), "gofileTest")
 
@@ -20,7 +19,7 @@ func TestModules(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	info,err := os.Stat(dir)
+	info, err := os.Stat(dir)
 	if err != nil || !info.IsDir() {
 		t.Error("Directory not created")
 	}
@@ -31,7 +30,7 @@ func TestModules(t *testing.T) {
 		t.Error(err)
 	}
 
-	if string(generateResult) != "I am a test\n" {
+	if string(generateResult)[:10] != "go version" {
 		t.Error("Go generate failed.")
 	}
 
@@ -49,11 +48,9 @@ func TestModules(t *testing.T) {
 	cmd.SetArgs([]string{"remove", dir})
 	err = cmd.Execute()
 
-	_,err = os.Stat(dir)
+	_, err = os.Stat(dir)
 	if err == nil {
 		t.Error("Directory not removed")
 	}
 
 }
-
-
