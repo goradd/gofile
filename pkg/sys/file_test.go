@@ -12,9 +12,8 @@ import (
 	"time"
 )
 
-
 func TestCopyFile(t *testing.T) {
-	dir,err := os.UserCacheDir()
+	dir, err := os.UserCacheDir()
 	if err != nil {
 		dir = os.TempDir()
 	}
@@ -26,7 +25,6 @@ func TestCopyFile(t *testing.T) {
 		return
 	}
 	defer os.RemoveAll(dir)
-
 
 	src := filepath.Join(dir, "test.txt")
 
@@ -45,7 +43,7 @@ func TestCopyFile(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	bytes,err := ioutil.ReadFile(dst)
+	bytes, err := ioutil.ReadFile(dst)
 	if string(bytes) != testContent {
 		t.Error("File content does not match")
 	}
@@ -65,7 +63,7 @@ func TestCopyFile(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	bytes,err = ioutil.ReadFile(dst)
+	bytes, err = ioutil.ReadFile(dst)
 	if string(bytes) != testContent {
 		t.Error("File content should not have changed")
 	}
@@ -75,7 +73,7 @@ func TestCopyFile(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	bytes,err = ioutil.ReadFile(dst)
+	bytes, err = ioutil.ReadFile(dst)
 	if string(bytes) != testContent2 {
 		t.Error("File should overwrite")
 	}
@@ -85,7 +83,7 @@ func TestCopyFile(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	bytes,err = ioutil.ReadFile(dst)
+	bytes, err = ioutil.ReadFile(dst)
 	if string(bytes) != testContent2 {
 		t.Error("File should not overwrite")
 	}
@@ -95,7 +93,7 @@ func TestCopyFile(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	bytes,err = ioutil.ReadFile(dst)
+	bytes, err = ioutil.ReadFile(dst)
 	if string(bytes) != testContent {
 		t.Error("File should overwrite")
 	}
@@ -109,7 +107,7 @@ func TestCopyFile(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	bytes,err = ioutil.ReadFile(dst)
+	bytes, err = ioutil.ReadFile(dst)
 	if string(bytes) != testContent3 {
 		t.Error("File content does not match")
 	}
@@ -123,11 +121,10 @@ func TestCopyFile(t *testing.T) {
 		t.Error("Copying a directory to a non-existant location should fail")
 	}
 
-	err = CopyFiles(dst2 + "/", CopyDoNotOverwrite, dir)
+	err = CopyFiles(dst2+"/", CopyDoNotOverwrite, dir)
 	if err == nil {
 		t.Error("Copying a directory to a non-existant location should fail")
 	}
-
 
 	err = os.Mkdir(dst2, 0777)
 	if err != nil {
@@ -139,15 +136,15 @@ func TestCopyFile(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	items,_ := ioutil.ReadDir(dst2)
+	items, _ := ioutil.ReadDir(dst2)
 	if items[0].Name() != "gofileTest" {
 		t.Fatal("First item in directory is not gofileTest")
 	}
 
 	// Now copy individual items
 	var items2 []string
-	items,_ = ioutil.ReadDir(dir)
-	for _,item := range items {
+	items, _ = ioutil.ReadDir(dir)
+	for _, item := range items {
 		items2 = append(items2, filepath.Join(dir, item.Name()))
 	}
 	err = CopyFiles(dst2, CopyDoNotOverwrite, items2...)
@@ -155,17 +152,15 @@ func TestCopyFile(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	items,_ = ioutil.ReadDir(dst2)
+	items, _ = ioutil.ReadDir(dst2)
 	if len(items) != 5 {
 		t.Error("Items were not copied")
 	}
 }
 
-
 func TestDirectoryCopy(t *testing.T) {
 	dir1 := filepath.Join(os.TempDir(), "dir1")
 	dir2 := filepath.Join(os.TempDir(), "dir2")
-
 
 	err := os.Mkdir(dir1, 0777)
 	if err != nil {
@@ -202,14 +197,14 @@ func TestDirectoryCopy(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	items,err := ioutil.ReadDir(dir2)
+	items, err := ioutil.ReadDir(dir2)
 	if err != nil {
 		t.Fatal(err)
 	}
 	if items[0].Name() != "dir1" {
 		t.Fatal("First item in directory is not dir1")
 	}
-	items,err = ioutil.ReadDir(filepath.Join(dir2, "dir1"))
+	items, err = ioutil.ReadDir(filepath.Join(dir2, "dir1"))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -238,7 +233,7 @@ func TestSplitList(t *testing.T) {
 }
 
 func TestModuleExpandFileList(t *testing.T) {
-	modules,err := ModulePaths()
+	modules, err := ModulePaths()
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -246,7 +241,7 @@ func TestModuleExpandFileList(t *testing.T) {
 	fileList := []string{
 		"github.com/goradd/gofile/*.md", // readme file
 		"github.com/goradd/gofile/LICENSE",
-		"/a/b/c", // non-existant items should be left alone
+		"/a/b/c", // non-existent items should be left alone
 	}
 	l := ModuleExpandFileList(fileList, modules)
 
@@ -254,17 +249,19 @@ func TestModuleExpandFileList(t *testing.T) {
 		t.Error("Not the correct list size.")
 	}
 
-	if listContains(l, "github.com/goradd/gofile/test1") {
-		t.Error("Item 1 was not changed.")
+	for _, i := range l {
+		if i[:6] == "github" {
+			t.Error("Item 1 or 2 was not changed.")
+		}
 	}
 
-	if !listContains(l, "/a/b/c") {
+	if !listContains(l, filepath.FromSlash("/a/b/c")) {
 		t.Error("Item 3 was changed.")
 	}
 }
 
 func listContains(list []string, val string) bool {
-	for _,l := range list {
+	for _, l := range list {
 		if l == val {
 			return true
 		}

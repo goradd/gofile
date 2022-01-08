@@ -12,7 +12,6 @@ import (
 	"testing"
 )
 
-
 func TestGZip(t *testing.T) {
 	f := filepath.Join(os.TempDir(), "gzipTest")
 	fgz := f + ".gz"
@@ -29,8 +28,8 @@ func TestGZip(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	_,err = os.Stat(fgz)
-	if err != nil  {
+	_, err = os.Stat(fgz)
+	if err != nil {
 		t.Error("Zip file not created")
 	}
 	var r *os.File
@@ -52,7 +51,11 @@ func TestGZip(t *testing.T) {
 
 func TestGZipDir(t *testing.T) {
 	dir := filepath.Join(os.TempDir(), "gzipTestDir")
-	_ = os.Mkdir(dir, 0o777)
+	if err := os.Mkdir(dir, 0o777); err != nil {
+		// if it already exists from prior failed test, remove it and try again
+		os.Remove(dir)
+		os.Mkdir(dir, 0o777)
+	}
 
 	f := filepath.Join(dir, "gzipTest")
 	f2 := filepath.Join(dir, "gzipTest2.txt")
@@ -78,30 +81,30 @@ func TestGZipDir(t *testing.T) {
 		t.Error(err)
 	}
 
-	if _,err := os.Stat(f); err == nil  {
+	if _, err := os.Stat(f); err == nil {
 		t.Error("Source file not removed")
 	}
 
-	if _,err := os.Stat(fgz); err != nil  {
+	if _, err := os.Stat(fgz); err != nil {
 		t.Error("Zip file not created")
 	}
-	if _,err := os.Stat(f2gz); err != nil  {
+	if _, err := os.Stat(f2gz); err != nil {
 		t.Error("Zip file #2 not created")
 	}
 
-	if _,err := os.Stat(f3gz); err == nil  {
+	if _, err := os.Stat(f3gz); err == nil {
 		t.Error("Zip file #3 was created, but should have been skipped")
 	}
-	if _,err := os.Stat(f3); err != nil  {
+	if _, err := os.Stat(f3); err != nil {
 		t.Error("Source file #3 was removed, but should have been left intact")
 	}
-
 
 	if r, err := os.Open(fgz); err != nil {
 		t.Error(err)
 	} else {
 		zr, _ := ziplib.NewReader(r)
 		out, _ := io.ReadAll(zr)
+		r.Close()
 		if string(out) != testString {
 			t.Error("unzip comparison failed: " + string(out))
 		}
@@ -112,13 +115,13 @@ func TestGZipDir(t *testing.T) {
 	} else {
 		zr, _ := ziplib.NewReader(r)
 		out, _ := io.ReadAll(zr)
+		r.Close()
 		if string(out) != testString {
 			t.Error("unzip #2 comparison failed: " + string(out))
 		}
 	}
 
-	if err := os.RemoveAll(dir) ; err != nil {
+	if err := os.RemoveAll(dir); err != nil {
 		t.Error(err)
 	}
 }
-

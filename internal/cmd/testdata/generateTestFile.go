@@ -4,5 +4,5 @@
 
 package testdata
 
-//go:generate echo "I am a test"
+//go:generate go version
 
