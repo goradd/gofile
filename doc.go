@@ -8,6 +8,13 @@ substituted for the module name.
 
 Gofile exports the ModulePaths() function as a library so you can build your own module aware tools.
 
+Commands that gofile can process are:
+- copy: Copies files and directories to a new destination
+- generate: Runs go generate on the file
+- mkdir: Creates a directory
+- remove: Removes files and directories
+- gzip: GZips files in place
+
 For complete documentation of the command-line tool, see the README file.
  */
 package main
