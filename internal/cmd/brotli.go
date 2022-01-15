@@ -1,18 +1,18 @@
-// Copyright 2018 Shannon Pekary. All rights reserved.
+// Copyright 2022 Shannon Pekary. All rights reserved.
 // Use of this source code is governed by an MIT
 // license that can be found in the LICENSE file.
 
 package cmd
 
 import (
-	ziplib "compress/gzip"
 	"fmt"
+	brotlilib "github.com/andybalholm/brotli"
 	"github.com/spf13/cobra"
 	"io"
 	"os"
 )
 
-func gzip(cmd *cobra.Command, args []string) error {
+func brotli(cmd *cobra.Command, args []string) error {
 	if len(files) == 0 {
 		if verbose {
 			fmt.Printf("No source files were specified in a gzip operation.")
@@ -21,8 +21,8 @@ func gzip(cmd *cobra.Command, args []string) error {
 	}
 
 	for _,f := range files {
-		if err := zipFile(f); err != nil {
-			return fmt.Errorf("error zipping file %s: %s", f, err.Error())
+		if err := brotliFile(f); err != nil {
+			return fmt.Errorf("error compressing file %s: %s", f, err.Error())
 		}
 		if deleteAfterZip {
 			if err := os.Remove(f); err != nil {
@@ -30,14 +30,14 @@ func gzip(cmd *cobra.Command, args []string) error {
 			}
 		}
 		if verbose {
-			fmt.Printf("Zipped %s\n", f)
+			fmt.Printf("Brotli compressed %s\n", f)
 		}
 	}
 	return nil
 }
 
-func zipFile(fileName string) error {
-	f, err := os.Create(fileName + ".gz")
+func brotliFile(fileName string) error {
+	f, err := os.Create(fileName + ".br")
 	if err != nil {
 		return err
 	}
@@ -52,8 +52,7 @@ func zipFile(fileName string) error {
 
 	var buf []byte
 	buf, err = io.ReadAll(r)
-	w, err := ziplib.NewWriterLevel(f, gzipCompressionLevel)
-	//w := ziplib.NewWriter(f)
+	w := brotlilib.NewWriterLevel(f, brotliCompressionLevel)
 	_, err = w.Write(buf)
 	if err != nil {
 		return err

@@ -5,16 +5,17 @@
 package cmd
 
 import (
-	ziplib "compress/gzip"
+	brotlilib "github.com/andybalholm/brotli"
 	"io"
 	"os"
 	"path/filepath"
 	"testing"
 )
 
-func TestGZip(t *testing.T) {
-	f := filepath.Join(os.TempDir(), "gzipTest")
-	fgz := f + ".gz"
+
+func TestBrotli(t *testing.T) {
+	f := filepath.Join(os.TempDir(), "brotliTest")
+	fbr := f + ".br"
 	const testString = "This is a test"
 
 	err := os.WriteFile(f, []byte(testString), 0o666)
@@ -23,46 +24,42 @@ func TestGZip(t *testing.T) {
 	}
 
 	cmd := MakeRootCommand()
-	cmd.SetArgs([]string{"gzip", f})
+	cmd.SetArgs([]string{"brotli", f})
 	err = cmd.Execute()
 	if err != nil {
 		t.Error(err)
 	}
-	_, err = os.Stat(fgz)
-	if err != nil {
-		t.Error("Zip file not created")
+	_,err = os.Stat(fbr)
+	if err != nil  {
+		t.Error("Brotli file not created")
 	}
 	var r *os.File
-	r, err = os.Open(fgz)
+	r, err = os.Open(fbr)
 	if err != nil {
 		t.Error(err)
 	}
 
-	zr, _ := ziplib.NewReader(r)
+	zr := brotlilib.NewReader(r)
 	var out []byte
 	out, err = io.ReadAll(zr)
 
 	if string(out) != testString {
-		t.Error("unzip comparison failed: " + string(out))
+		t.Error("unBrotli comparison failed: " + string(out))
 	}
 	_ = os.Remove(f)
-	_ = os.Remove(fgz)
+	_ = os.Remove(fbr)
 }
 
-func TestGZipDir(t *testing.T) {
-	dir := filepath.Join(os.TempDir(), "gzipTestDir")
-	if err := os.Mkdir(dir, 0o777); err != nil {
-		// if it already exists from prior failed test, remove it and try again
-		os.Remove(dir)
-		os.Mkdir(dir, 0o777)
-	}
+func TestBrotliDir(t *testing.T) {
+	dir := filepath.Join(os.TempDir(), "brotliTestDir")
+	_ = os.Mkdir(dir, 0o777)
 
-	f := filepath.Join(dir, "gzipTest")
-	f2 := filepath.Join(dir, "gzipTest2.txt")
-	f3 := filepath.Join(dir, "gzipTest3.abc")
-	fgz := f + ".gz"
-	f2gz := f2 + ".gz"
-	f3gz := f3 + ".gz"
+	f := filepath.Join(dir, "brotliTest")
+	f2 := filepath.Join(dir, "brotliTest2.txt")
+	f3 := filepath.Join(dir, "brotliTest3.abc")
+	fgz := f + ".br"
+	f2gz := f2 + ".br"
+	f3gz := f3 + ".br"
 	const testString = "This is another test"
 
 	if err := os.WriteFile(f, []byte(testString), 0o666); err != nil {
@@ -76,52 +73,52 @@ func TestGZipDir(t *testing.T) {
 	}
 
 	cmd := MakeRootCommand()
-	cmd.SetArgs([]string{"gzip", "-v", "-d", "-q", "4", "-x", "*.abc", dir})
+	cmd.SetArgs([]string{"brotli", "-v", "-d", "-q", "4", "-x", "*.abc", dir})
 	if err := cmd.Execute(); err != nil {
 		t.Error(err)
 	}
 
-	if _, err := os.Stat(f); err == nil {
+	if _,err := os.Stat(f); err == nil  {
 		t.Error("Source file not removed")
 	}
 
-	if _, err := os.Stat(fgz); err != nil {
-		t.Error("Zip file not created")
+	if _,err := os.Stat(fgz); err != nil  {
+		t.Error("Brotli file not created")
 	}
-	if _, err := os.Stat(f2gz); err != nil {
-		t.Error("Zip file #2 not created")
+	if _,err := os.Stat(f2gz); err != nil  {
+		t.Error("Brotli file #2 not created")
 	}
 
-	if _, err := os.Stat(f3gz); err == nil {
-		t.Error("Zip file #3 was created, but should have been skipped")
+	if _,err := os.Stat(f3gz); err == nil  {
+		t.Error("Brotli file #3 was created, but should have been skipped")
 	}
-	if _, err := os.Stat(f3); err != nil {
+	if _,err := os.Stat(f3); err != nil  {
 		t.Error("Source file #3 was removed, but should have been left intact")
 	}
+
 
 	if r, err := os.Open(fgz); err != nil {
 		t.Error(err)
 	} else {
-		zr, _ := ziplib.NewReader(r)
+		zr := brotlilib.NewReader(r)
 		out, _ := io.ReadAll(zr)
-		r.Close()
 		if string(out) != testString {
-			t.Error("unzip comparison failed: " + string(out))
+			t.Error("Brotli decompress comparison failed: " + string(out))
 		}
 	}
 
 	if r, err := os.Open(f2gz); err != nil {
 		t.Error(err)
 	} else {
-		zr, _ := ziplib.NewReader(r)
+		zr := brotlilib.NewReader(r)
 		out, _ := io.ReadAll(zr)
-		r.Close()
 		if string(out) != testString {
-			t.Error("unzip #2 comparison failed: " + string(out))
+			t.Error("Brotli decompress #2 comparison failed: " + string(out))
 		}
 	}
 
-	if err := os.RemoveAll(dir); err != nil {
+	if err := os.RemoveAll(dir) ; err != nil {
 		t.Error(err)
 	}
 }
+

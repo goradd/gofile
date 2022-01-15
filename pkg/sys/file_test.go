@@ -169,6 +169,10 @@ func TestDirectoryCopy(t *testing.T) {
 	}
 	defer os.RemoveAll(dir1)
 
+	if !IsDir(dir1) {
+		t.Fatal("directory not detected")
+	}
+
 	err = os.Mkdir(dir2, 0777)
 	if err != nil {
 		t.Fatal(err)
