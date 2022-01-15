@@ -37,6 +37,11 @@ func brotli(cmd *cobra.Command, args []string) error {
 }
 
 func brotliFile(fileName string) error {
+
+	if brotliCompressionLevel < 0 || brotliCompressionLevel > 11 {
+		return fmt.Errorf("compression level must be between 0 and 11")
+	}
+
 	f, err := os.Create(fileName + ".br")
 	if err != nil {
 		return err

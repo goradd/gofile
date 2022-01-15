@@ -52,8 +52,11 @@ func zipFile(fileName string) error {
 
 	var buf []byte
 	buf, err = io.ReadAll(r)
-	w, err := ziplib.NewWriterLevel(f, gzipCompressionLevel)
-	//w := ziplib.NewWriter(f)
+	var w *ziplib.Writer
+	w, err = ziplib.NewWriterLevel(f, gzipCompressionLevel)
+	if err != nil {
+		return err
+	}
 	_, err = w.Write(buf)
 	if err != nil {
 		return err
