@@ -20,6 +20,8 @@ var copyOverwrite bool
 var copyOverwriteIfNewer bool
 var verbose bool
 var deleteAfterZip bool
+var gzipCompressionLevel int
+var brotliCompressionLevel int
 
 func MakeRootCommand() *cobra.Command {
 	var err error
@@ -84,16 +86,28 @@ copying more than one file, the destination must be a directory that exists.`,
 	}
 
 	var cmdGZip = &cobra.Command{
-		Use:    "gzip [files or directories to zip]",
-		Short:  "GZip the given files or directories.",
-		Long:   `GZips the given files, or all the files in given directories, placing zipped files alongside the given files, with .gz suffixes. Uses the maximum compression algorithm.`,
-		Args:   cobra.MinimumNArgs(1),
+		Use:   "gzip [files or directories to zip]",
+		Short: "GZip the given files or directories.",
+		Long: `GZips the given files, or all the files in the specified directories, placing zipped files alongside the given files, with .gz suffixes. Uses the maximum compression algorithm.`,
+		Args: cobra.MinimumNArgs(1),
 		PreRun: processExpandedFileListArgs,
 		RunE:   gzip,
 	}
-	cmdGZip.Flags().BoolVarP(&deleteAfterZip, "delete", "d", false, "Zipped source files will be deleted, leaving only the zipped version.")
+	cmdGZip.Flags().BoolVarP(&deleteAfterZip, "delete", "d", false, "Compressed source files will be deleted, leaving only the compressed version.")
+	cmdGZip.Flags().IntVarP(&gzipCompressionLevel, "quality", "q", 9, "The compression level to use. Higher numbers offer higher compression and slower compression speed, but have negligible effect on decompression speed.")
 
-	rootCmd.AddCommand(cmdRemove, cmdGenerate, cmdCopy, cmdMkDir, cmdGZip)
+	var cmdBrotli = &cobra.Command{
+		Use:   "brotli [files or directories to compress]",
+		Short: "Brotli compress the given files or directories.",
+		Long: `Compresses the given files with the Brotli method, or all the files in the specified directories, placing compressed files alongside the given files, with .br suffixes.`,
+		Args: cobra.MinimumNArgs(1),
+		PreRun: processExpandedFileListArgs,
+		RunE: brotli,
+	}
+	cmdBrotli.Flags().BoolVarP(&deleteAfterZip, "delete", "d", false, "Compressed source files will be deleted, leaving only the compressed version.")
+	cmdBrotli.Flags().IntVarP(&brotliCompressionLevel, "quality", "q", 11, "The compression level to use. Higher numbers offer higher compression and slower compression speed, and have negligible effect on decompression speed.")
+
+	rootCmd.AddCommand(cmdRemove, cmdGenerate, cmdCopy, cmdMkDir, cmdGZip, cmdBrotli)
 
 	return rootCmd
 }
