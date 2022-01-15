@@ -102,9 +102,11 @@ func TestBrotliDir(t *testing.T) {
 	} else {
 		zr := brotlilib.NewReader(r)
 		out, _ := io.ReadAll(zr)
+		r.Close()
 		if string(out) != testString {
 			t.Error("Brotli decompress comparison failed: " + string(out))
 		}
+
 	}
 
 	if r, err := os.Open(f2gz); err != nil {
@@ -112,6 +114,7 @@ func TestBrotliDir(t *testing.T) {
 	} else {
 		zr := brotlilib.NewReader(r)
 		out, _ := io.ReadAll(zr)
+		r.Close()
 		if string(out) != testString {
 			t.Error("Brotli decompress #2 comparison failed: " + string(out))
 		}
