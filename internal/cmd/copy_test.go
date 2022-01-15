@@ -14,7 +14,7 @@ import (
 func TestCopy(t *testing.T) {
 	dir := filepath.Join(os.TempDir(), "gofileTest")
 
-	cmd := MakeRootCommand()
+	cmd, _ := MakeRootCommand()
 	cmd.SetArgs([]string{"mkdir", "-v", dir})
 	err := cmd.Execute()
 	if err != nil {
@@ -55,9 +55,9 @@ func TestCopy(t *testing.T) {
 func TestSubCopy(t *testing.T) {
 	dir := filepath.Join(os.TempDir(), "gofileTest2")
 
-	cmd := MakeRootCommand()
+	cmd,err := MakeRootCommand()
 	cmd.SetArgs([]string{"mkdir", dir})
-	err := cmd.Execute()
+	err = cmd.Execute()
 	if err != nil {
 		t.Error(err)
 	}

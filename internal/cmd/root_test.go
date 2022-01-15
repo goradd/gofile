@@ -13,7 +13,7 @@ import (
 func TestModules(t *testing.T) {
 	dir := filepath.Join(os.TempDir(), "gofileTest")
 
-	cmd := MakeRootCommand()
+	cmd, _ := MakeRootCommand()
 	cmd.SetArgs([]string{"mkdir", dir})
 	err := cmd.Execute()
 	if err != nil {

@@ -6,6 +6,7 @@ package cmd
 
 import (
 	ziplib "compress/gzip"
+	"github.com/spf13/cobra"
 	"io"
 	"os"
 	"path/filepath"
@@ -22,7 +23,8 @@ func TestGZip(t *testing.T) {
 		t.Error("Test file not created :" + err.Error())
 	}
 
-	cmd := MakeRootCommand()
+	var cmd *cobra.Command
+	cmd, err = MakeRootCommand()
 	cmd.SetArgs([]string{"gzip", f})
 	err = cmd.Execute()
 	if err != nil {
@@ -75,7 +77,7 @@ func TestGZipDir(t *testing.T) {
 		t.Error("Test file #3 not created :" + err.Error())
 	}
 
-	cmd := MakeRootCommand()
+	cmd, _ := MakeRootCommand()
 	cmd.SetArgs([]string{"gzip", "-v", "-d", "-q", "4", "-x", "*.abc", dir})
 	if err := cmd.Execute(); err != nil {
 		t.Error(err)

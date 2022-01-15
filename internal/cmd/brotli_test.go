@@ -23,7 +23,7 @@ func TestBrotli(t *testing.T) {
 		t.Error("Test file not created :" + err.Error())
 	}
 
-	cmd := MakeRootCommand()
+	cmd, _ := MakeRootCommand()
 	cmd.SetArgs([]string{"brotli", f})
 	err = cmd.Execute()
 	if err != nil {
@@ -72,7 +72,7 @@ func TestBrotliDir(t *testing.T) {
 		t.Error("Test file #3 not created :" + err.Error())
 	}
 
-	cmd := MakeRootCommand()
+	cmd, _ := MakeRootCommand()
 	cmd.SetArgs([]string{"brotli", "-v", "-d", "-q", "4", "-x", "*.abc", dir})
 	if err := cmd.Execute(); err != nil {
 		t.Error(err)
