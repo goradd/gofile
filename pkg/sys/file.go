@@ -35,7 +35,10 @@ func SplitList(s string) (list []string) {
 //   replace any items that start with a module with the actual location on disk
 //   expand any glob patterns
 //   remove duplicates
-// It will return the final list. modules is the list of modules returned from ModulePaths.
+// It will return the final list.
+//
+// modules is the list of modules returned from ModulePaths.
+//
 // Glob patterns will be matched, and if nothing is found, no file will be generated.
 // However, if a path does not have a glob pattern, but does not exist, it will be left in the list,
 // since it might refer to a file or directory you want to add.

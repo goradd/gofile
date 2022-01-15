@@ -25,7 +25,7 @@ func TestCopy(t *testing.T) {
 		t.Error("Directory not created")
 	}
 
-	cmd.SetArgs([]string{"copy", "-v", "-x", "b", "testdata/copytest/*", dir})
+	cmd.SetArgs([]string{"copy", "-v", "-x", "b", "github.com/goradd/gofile/internal/cmd/testdata/copytest/*", dir})
 	err = cmd.Execute()
 	if err != nil {
 		t.Error(err)
@@ -50,7 +50,6 @@ func TestCopy(t *testing.T) {
 	if err == nil {
 		t.Error("Directory not removed")
 	}
-
 }
 
 func TestSubCopy(t *testing.T) {
@@ -86,6 +85,38 @@ func TestSubCopy(t *testing.T) {
 	if err == nil {
 		t.Error("Directory not removed")
 	}
-
-
 }
+
+/*
+func TestModuleDirectoryCopy(t *testing.T) {
+	modules, err := ModulePaths()
+
+	dir1 := filepath.Join(os.TempDir(), "dir1")
+	//dir1 := "github.com/goradd/gofile/test/dir1"
+	//dir1,_ = GetModulePath(dir1, modules)
+
+	os.RemoveAll(dir1)
+
+	err = os.Mkdir(dir1, 0777)
+	if err != nil {
+		t.Fatal(err)
+		return
+	}
+	defer os.RemoveAll(dir1)
+
+	if !IsDir(dir1) {
+		t.Fatal("directory not detected")
+	}
+
+	dir2 := "github.com/goradd/gofile/internal/testdir"
+	dir2Actual, _ := GetModulePath(dir2, modules)
+
+	if err = CopyDirectory(dir2Actual, dir1, CopyOverwrite); err != nil {
+		t.Fatal(err)
+	}
+
+	if !IsDir(filepath.Join(dir1, "testdir")) {
+		t.Fatal("test directory not detected")
+	}
+}*/
+

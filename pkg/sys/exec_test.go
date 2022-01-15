@@ -14,7 +14,6 @@ func TestModules(t *testing.T) {
 
 	// since modules are very dependent on the environment, this is mostly just
 	// a sanity check that it works without errors.
-
 	modules,err := ModulePaths()
 	if err != nil {
 		t.Fatal(err)
@@ -62,8 +61,5 @@ func TestSplitCommandParts(t *testing.T) {
 	if len(parts) != 1 || fmt.Sprint(parts) != `[abb ccd]` || err != nil {
 		t.Error(fmt.Sprint(parts))
 	}
-
-
-
 }
 

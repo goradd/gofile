@@ -10,9 +10,7 @@ import (
 	"fmt"
 	"io"
 	"os/exec"
-	"path"
 	"path/filepath"
-	"runtime"
 	"strings"
 )
 
@@ -85,11 +83,11 @@ type pathType10 struct {
 }
 
 
-// ModulePaths returns a listing of the paths of all the modules included in the build, keyed by module name, as if the build was run from the
-// current working directory. Note that Go's module support can change a build based on the go.mod file found, which is dependent
-// on the current working directory.
+// ModulePaths returns a listing of the paths of all the modules included in the go.mod file,
+// keyed by module name, from the perspective of the
+// current working directory.
 //
-// If we are building without module support, it will return only the top paths to packages, since everything in this
+// If we are running without module support, it will return only the top paths to packages, since everything in this
 // situation will be relative to GOPATH.
 func ModulePaths() (ret map[string]string, err error) {
 	var outText []byte
@@ -113,33 +111,9 @@ func ModulePaths() (ret map[string]string, err error) {
 		}
 		return
 	} else {
-		// We don't have module support, so everything flows from top level locations
-		if outText, err = ExecuteShellCommand("go list -e -find -json all"); err != nil {
-			return nil,fmt.Errorf("error executing shell command %s, %s", outText, err.Error())
-		}
-
-		root := runtime.GOROOT()	// we are going to remove built in packages
-		if outText != nil && len(outText) > 0 {
-			ret = make (map[string]string)
-			dec := json.NewDecoder(bytes.NewReader(outText))
-			for {
-				var v pathType10
-				if err := dec.Decode(&v); err != nil {
-					if err == io.EOF {
-						break
-					}
-					return nil,fmt.Errorf("error unpacking json from go list command.\n%s\n%s", string(outText), err.Error())
-				}
-				if len(root) <= len(v.Dir) && v.Dir[:len(root)] != root { // exclude built-in packages
-					// truncate the path up to the top level. We have to try to preserve the same format we were given.
-					pathItems := strings.Split(v.ImportPath, "/")
-					p := path.Join(pathItems[1:]...)
-					dir := v.Dir[:len(v.Dir) - len(p) - 1]
-					ret[pathItems[0]] = dir
-				}
-			}
-		}
-		return
+		// unpack standard error
+		stdErr := string(err.(*exec.ExitError).Stderr)
+		return nil,fmt.Errorf("error getting module list %s", stdErr)
 	}
 }
 

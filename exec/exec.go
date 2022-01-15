@@ -1,16 +1,21 @@
 package exec
 
 import (
+	"fmt"
 	"github.com/goradd/gofile/internal/cmd"
-	"log"
+	"os"
 )
 
 func Execute() {
-	rootCmd := cmd.MakeRootCommand()
-
-	err := rootCmd.Execute()
+	rootCmd,err := cmd.MakeRootCommand()
 
 	if err != nil {
-		log.Fatal(err)
+		fmt.Fprintf(os.Stderr, err.Error())
+		os.Exit(1)
 	}
+	err = rootCmd.Execute()
+
+	if err != nil {
+		fmt.Fprintf(os.Stderr, err.Error())
+		os.Exit(1)	}
 }

@@ -2,37 +2,29 @@
 
 Gofile is a simple file and directory manipulation tool primarily useful for building go applications and libraries. 
 
-Go is module and GOPATH aware, and is cross-platform. Any directory can be represented as a module name,
+Go is module aware, and is cross-platform. Any directory can be represented as a module name,
 followed by a subdirectory and the real path of the module will be substituted for 
 the module name. Path names should use forward slashes to separate directories, and you can substitute 
 environment variables into the path names using $VAR, or ${VAR} syntax.
 
-Gofile is particularly useful for making build scripts for open-source projects. The cross-platform feature allows
+Gofile is particularly useful for making build scripts for cross-platform projects. The cross-platform feature allows
 you to create command-line scripts that will work on Windows and Unix based systems. The module aware feature
 allows you to specify a path relative to a module's location, simply by starting the path with the module specifier.
-If you are not working in Module-aware mode, it will use the GOPATH to locate packages instead.
 
-If you are using modules, there may be times when you would like to work on packages and modules that are in your
-go.mod file's require statements. However, in module-aware mode, these files are located in your GOPATH and the 
-GOPATH is write-protected, so you cannot edit those files. The solution is to use a replace statement in your go.mod
-file to temporarily point the module to different location on your disk. For example, the following replace statement
-will change where the go build system will look for the gofile source:
+If you put "replace" statements in the go.mod file, gofile will honor those too. 
+For example, if your go.mod file has the following replace statement:
 
 `
-replace github.com/goradd/gofile => ../gofile-src // to work with a local version of gofile
+replace github.com/myproj/proj => /proj-src
 `
 
-However, this can pose other problems if your build system is copying files out of one of these modules. If you use
-the GOPATH environment variable in your build scripts to locate a module, it will not know about the change you
-made in the go.mod file. Gofile solves this problem by substituting a module name for its disk location. For example,
+and you execute the following command from within the source tree of the go.mod file:
 
 `
-gofile copy github.com/goradd/gofile/README.md /a/b/
+gofile copy github.com/myproj/proj/README.md /a/b/
 `
-will copy this README file to the /a/b/ directory on your disk, even if you have changed the location of the gofile
-module using a replace statement. Gofile looks for the go.mod file by searching for it in the current working directory,
-and parent directories until it finds one. Note that this is standard behavior of the go build tools and not under
-gofile's control. 
+
+gofile will copy the README.md file from /proj-src to the /a/b/ directory.
 
 Gofile exports the ModulePaths() function as a library so you can build your own module aware tools. 
 

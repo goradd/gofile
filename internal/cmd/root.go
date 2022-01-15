@@ -5,6 +5,7 @@
 package cmd
 
 import (
+	"fmt"
 	"github.com/goradd/gofile/pkg/sys"
 	"github.com/spf13/cobra"
 	"io/fs"
@@ -23,12 +24,12 @@ var deleteAfterZip bool
 var gzipCompressionLevel int
 var brotliCompressionLevel int
 
-func MakeRootCommand() *cobra.Command {
+func MakeRootCommand() (*cobra.Command, error) {
 	var err error
 
 	modules, err = sys.ModulePaths()
 	if err != nil {
-		panic(err)
+		return nil, err
 	}
 
 	var rootCmd = &cobra.Command{
@@ -109,7 +110,7 @@ copying more than one file, the destination must be a directory that exists.`,
 
 	rootCmd.AddCommand(cmdRemove, cmdGenerate, cmdCopy, cmdMkDir, cmdGZip, cmdBrotli)
 
-	return rootCmd
+	return rootCmd, nil
 }
 
 func processExclude(cmd *cobra.Command, args []string) {
@@ -188,6 +189,9 @@ func isExcluded(file string) bool {
 
 func processFileArg(arg string) string {
 	arg = os.ExpandEnv(arg)
-	arg, _ = sys.GetModulePath(arg, modules)
-	return arg
+	arg2, _ := sys.GetModulePath(arg, modules)
+	if verbose && arg2 != arg {
+		fmt.Printf("module path " + arg + " found at " + arg2)
+	}
+	return arg2
 }
