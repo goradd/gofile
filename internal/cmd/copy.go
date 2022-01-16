@@ -33,7 +33,7 @@ func copyFiles(cmd *cobra.Command, args []string) error {
 		return nil
 	}
 
-	err := sys.CopyFiles(dest, overwrite, files...)
+	err := sys.CopyFilesEx(dest, overwrite, excludes, files...)
 
 	if err != nil {
 		return err

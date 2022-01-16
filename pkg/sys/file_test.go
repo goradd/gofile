@@ -236,6 +236,76 @@ func TestSplitList(t *testing.T) {
 
 }
 
+func TestDirectoryCopyEx(t *testing.T) {
+	dir1 := filepath.Join(os.TempDir(), "dir1")
+	dir2 := filepath.Join(os.TempDir(), "dir2")
+	os.RemoveAll(dir1)
+	err := os.Mkdir(dir1, 0777)
+	if err != nil {
+		t.Fatal(err)
+		return
+	}
+	defer os.RemoveAll(dir1)
+
+	if !IsDir(dir1) {
+		t.Fatal("directory not detected")
+	}
+	os.RemoveAll(dir2)
+	err = os.Mkdir(dir2, 0777)
+	if err != nil {
+		t.Fatal(err)
+		return
+	}
+	defer os.RemoveAll(dir2)
+
+	subdir := filepath.Join(dir1, "subdir1")
+	if err := os.Mkdir(subdir, 0777); err != nil {
+		t.Fatal(err)
+	}
+
+	// set up the test directory
+	testContent := "I am a test"
+	if err := ioutil.WriteFile(filepath.Join(dir1, "test1"), []byte(testContent), 0755); err != nil {
+		t.Fatal(err)
+	}
+	if err := ioutil.WriteFile(filepath.Join(dir1, "test2"), []byte(testContent), 0755); err != nil {
+		t.Fatal(err)
+	}
+	if err := ioutil.WriteFile(filepath.Join(dir1, "test3.abc"), []byte(testContent), 0755); err != nil {
+		t.Fatal(err)
+	}
+	if err := ioutil.WriteFile(filepath.Join(subdir, "test4"), []byte(testContent), 0755); err != nil {
+		t.Fatal(err)
+	}
+
+	if err := CopyDirectoryEx(dir1, dir2, CopyOverwrite, []string{"*.abc"}); err != nil {
+		t.Fatal(err)
+	}
+
+	items, err := ioutil.ReadDir(dir2)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if items[0].Name() != "dir1" {
+		t.Fatal("First item in directory is not dir1")
+	}
+	items, err = ioutil.ReadDir(filepath.Join(dir2, "dir1"))
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	if items[0].Name() != "subdir1" {
+		t.Fatal("First item in directory is not subdir1, but rather: " + items[0].Name())
+	}
+	if items[1].Name() != "test1" {
+		t.Fatal("Second item in directory is not test1, but rather: " + items[1].Name())
+	}
+	if len(items) != 3 {
+		t.Fatalf("Did not copy the correct number of items: %d", len(items))
+	}
+}
+
+
 func TestModuleExpandFileList(t *testing.T) {
 	modules, err := ModulePaths()
 	if err != nil {

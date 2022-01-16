@@ -70,8 +70,9 @@ Usage:
 ```shell
 gofile copy [-x excludes...] [-o|-n] <src> <dest> 
 ```
--x specifies names of files or directories you want to exclude from the source. This is useful when
-expanding a directory using '*'.
+-x specifies names of files or directories you want to exclude from the source. This will match
+file patterns as well. This is useful when copying whole directories but needing to exclude specific
+types of files from the process.
 
 Normally, a previously existing file will not be overwritten, and a previously existing directory will not be
 deleted first but rather files will be added that are not present in the directory. The -o option will force

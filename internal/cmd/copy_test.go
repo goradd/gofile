@@ -25,7 +25,7 @@ func TestCopy(t *testing.T) {
 		t.Error("Directory not created")
 	}
 
-	cmd.SetArgs([]string{"copy", "-v", "-x", "b", "github.com/goradd/gofile/internal/cmd/testdata/copytest/*", dir})
+	cmd.SetArgs([]string{"copy", "-v", "-x", "b:*.abc", "github.com/goradd/gofile/internal/cmd/testdata/copytest/*", dir})
 	err = cmd.Execute()
 	if err != nil {
 		t.Error(err)
@@ -42,6 +42,11 @@ func TestCopy(t *testing.T) {
 	if _, err = os.Stat(filepath.Join(dir, "c")); err != nil {
 		t.Error(err)
 	}
+
+	if _, err = os.Stat(filepath.Join(dir, "c", "e", "no.abc")); err == nil {
+		t.Error("File no.abc was copied, but should not have been copied")
+	}
+
 
 	cmd.SetArgs([]string{"remove", "-v", dir})
 	err = cmd.Execute()

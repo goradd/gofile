@@ -79,7 +79,7 @@ func TestGZipDir(t *testing.T) {
 	}
 
 	cmd, _ := MakeRootCommand()
-	cmd.SetArgs([]string{"gzip", "-v", "-d", "-q", "4", "-x", "*.abc", dir})
+	cmd.SetArgs([]string{"gzip", "-v", "-d", "-q", "4", "-x", "nada:*.abc", dir})
 	if err := cmd.Execute(); err != nil {
 		t.Error(err)
 	}
@@ -143,7 +143,7 @@ func TestGZipRecurse(t *testing.T) {
 	}
 
 	cmd, _ := MakeRootCommand()
-	cmd.SetArgs([]string{"gzip", "-v", "-d", dir})
+	cmd.SetArgs([]string{"gzip", "-v", "-d", "-x", "*.abc", dir})
 	if err := cmd.Execute(); err != nil {
 		t.Error(err)
 	}

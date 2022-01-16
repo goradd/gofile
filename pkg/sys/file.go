@@ -180,7 +180,7 @@ func CopyFiles(dst string, overwrite CopyOverwriteType, src... string) (err erro
 	return
 }
 
-// copyTo copies the given file to the destination directory. If a name is given, it will rename the file.
+// copyFileTo copies the given file to the destination directory. If a name is given, it will rename the file.
 // It does no checks to see if the destination directory exists. If the file exists, it will
 // replace it using the same permission bits as the destination. If it doesn't exist, it will
 // use 644.
@@ -341,11 +341,221 @@ func CopyDirectory(src, dst string, overwrite CopyOverwriteType) (err error) {
 	return
 }
 
+// CopyDirectoryEx copies the src directory to the destination directory excluding files that match a specified pattern.
+//
+// The destination directory will be the parent of
+// the resulting directory, and the result will have the same name as the source. If the destination already exists,
+// it will perform a kind of merge, where existing files will not be touched, and only new files will be copied.
+// If you want to replace the destination, delete it first. dst must exist.
+func CopyDirectoryEx(src, dst string, overwrite CopyOverwriteType, excludes []string) (err error) {
+	dstInfo, dstErr := os.Stat(dst)
+	_, srcErr := os.Stat(src)
+
+	if srcErr != nil {
+		return fmt.Errorf("source directory error: %s", srcErr.Error())
+	}
+
+	if dstErr != nil {
+		return fmt.Errorf("destination directory error: %s", dstErr.Error())
+	}
+
+	dirDest := filepath.Dir(dst)
+	if len(src) <= len(dirDest) && dirDest[:len(src)] == src { // does dst start with src?
+		return fmt.Errorf("destination directory is not allowed to be in the src directory")
+	}
+
+	if !dstInfo.Mode().IsDir() {
+		return fmt.Errorf("source %s is a file, not a directory", dst)
+	}
+
+	// create destination if needed
+	newPath := filepath.Join(dst, filepath.Base(src))
+
+	newInfo, err := os.Stat(newPath)
+	if err == nil || !os.IsNotExist(err) {
+		// path exists
+		if !newInfo.IsDir() {
+			return fmt.Errorf("path %s is a directory in the source, but %s is a file in the destination", src, newPath)
+		}
+	} else {
+		//perm := srcInfo.Mode().Perm()	// copy the permission
+		err = os.Mkdir(newPath, 0755)
+		if err != nil {
+			return fmt.Errorf("error creating directory %s: %s", newPath, err.Error())
+		}
+	}
+
+	f, err := os.Open(src)
+	if err != nil {
+		return err
+	}
+	list, err := f.Readdir(-1)
+	_ = f.Close()
+
+	for _,item := range list {
+		itemName := item.Name()
+		if isExcluded(itemName, excludes) {
+			continue // skip
+		}
+
+		itemPath := filepath.Join(src, itemName)
+		err = copyToEx(itemPath, newPath, itemName, overwrite, excludes)
+		if err != nil {
+			return err
+		}
+	}
+
+	return
+}
+
+// copyTo copies the src to the destination directory. The source can be a file or directory.
+// if a name is specified, src must be a file. The name will be the name of the file in the new directory.
+func copyToEx(src string, destDir string, name string, overwrite CopyOverwriteType, excludes []string) error {
+	srcInfo, srcErr := os.Stat(src)
+
+	if srcErr != nil {
+		return srcErr
+	}
+
+	if srcInfo.IsDir() && name != "" {
+		if name != filepath.Base(src) {
+			return fmt.Errorf("cannot copy a directory to a file")
+		}
+		p := filepath.Join(destDir, name)
+		dstInfo, dstErr := os.Stat(p)
+		if (dstErr == nil || !os.IsNotExist(dstErr)) &&
+			!dstInfo.IsDir() {
+			return fmt.Errorf("cannot copy a directory onto a file that already exists: %s", p)
+		}
+	}
+
+	if !srcInfo.IsDir() {
+		if isExcluded(src, excludes) {
+			return nil // skip file
+		}
+		return copyFileTo(src, destDir, name, overwrite)
+	}
+
+	// src is a directory, and destination is a directory
+	return CopyDirectoryEx(src, destDir, overwrite, excludes)
+}
+
+// CopyFilesEx copies the src files or directories to the destination excluding files matching the exclusions slice.
+//
+// If there is more than one source, the destination must be a directory that exists. The items listed
+// will be copied inside the destination directory.
+//
+// If there is only one source, the destination must be:
+//   - A directory that exists, in which case the source will be placed in the destination directory
+//   - A file that exists, in which case the source will overwrite the destination. The source must also be a single file.
+//	 - A file that does not exist, but whose parent directory does exist, in which case the file will be copied
+//     and renamed to the destination.
+// If overwrite is true, files that already exist will be overwritten. If overwrite is false, only new files
+// will be created. If a directory is over-writing another directory, this will determine what happens when
+// file names are duplicates. Note that old files in a directory will not be deleted when a directory
+// overwrites another directory. If you want old files to be deleted, empty the destination directory first.
+func CopyFilesEx(dst string, overwrite CopyOverwriteType, exclusions []string, src... string) (err error) {
+	// Sanity checks
+	if dst == "" {
+		return fmt.Errorf("no destination specified")
+	}
+
+	if len(src) == 0 {
+		return fmt.Errorf("no source files specified")
+	}
+
+
+	dstInfo, destErr := os.Stat(dst)
+	srcInfo, srcErr := os.Stat(src[0])
+
+	if srcErr != nil {
+		return fmt.Errorf("error with source: %s", srcErr.Error())
+	}
+
+	if len(src) > 1 || srcInfo.IsDir() {
+		if destErr != nil {
+			return destErr // path doesn't exist?
+		}
+		if !dstInfo.IsDir() {
+			return fmt.Errorf("when copying multiple files, the destination must be a directory: %s", dst)
+		}
+
+		for _,f := range src {
+			err = copyToEx(f, dst, "", overwrite, exclusions)
+			if err != nil {
+				return
+			}
+		}
+	} else {
+		if os.IsPathSeparator(dst[len(dst) -  1]) {
+			// Definitely trying to point to a directory
+			if os.IsNotExist(destErr) {
+				return fmt.Errorf("the destination directory does not exist: %s", dst)
+			}
+			err = copyToEx(src[0], dst, "", overwrite, exclusions)
+			if err != nil {
+				return
+			}
+		} else {
+			// might be a destination directory, or a file
+			if os.IsNotExist(destErr) {
+				// Since it doesn't exist, we are going to assume we are trying to specify a file, since
+				// we have already checked above to see if we are trying to specify a directory with a slash at end.
+
+				// Check on parent directory
+				parentDir, fileName := filepath.Split(dst)
+				_, parentErr := os.Stat(parentDir)
+				if parentErr != nil {
+					return fmt.Errorf("The parent directory of a new file must exist: %s", dst)
+				}
+				// We are writing to a new file
+				if isExcluded(src[0], exclusions) {
+					return nil
+				}
+				err = copyFileTo(src[0], parentDir, fileName, overwrite)
+				if err != nil {
+					return
+				}
+			} else {
+				// destination is a file or a directory that already exists
+				if dstInfo.IsDir() {
+					err = copyToEx(src[0], dst, "", overwrite, exclusions)
+					if err != nil {
+						return
+					}
+				} else {
+					parentDir, fileName := filepath.Split(dst)
+					if isExcluded(src[0], exclusions) {
+						return nil
+					}
+					err = copyTo(src[0], parentDir, fileName, overwrite)
+					if err != nil {
+						return
+					}
+				}
+			}
+		}
+	}
+	return
+}
+
+
 // IsDir returns true if the given path exists and is a directory
 func IsDir(path string) bool {
 	dstInfo, err := os.Stat(path)
 	if err == nil { // file exists
 		if dstInfo.Mode().IsDir() {
+			return true
+		}
+	}
+	return false
+}
+
+// isExcluded returns true if the given file matches one of the exclusion strings
+func isExcluded(file string, excludes []string) bool {
+	for _, e := range excludes {
+		m, _ := filepath.Match(e, filepath.Base(file))
+		if m {
 			return true
 		}
 	}
