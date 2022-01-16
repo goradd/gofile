@@ -120,7 +120,8 @@ If a directory is specified, then the files inside that directory are individual
 compressed. This will recursively do the same to directories within the specified directory.
 
 Compressed files are placed in the same directory as the source file, and the
-file name is appended with ".gz"
+file name is appended with ".gz". If a file already has a ".gz" extension, gofile will
+assume the file is already compressed and skip it.
 
 Usage:
 ```shell
@@ -144,7 +145,8 @@ If a directory is specified, then the files inside that directory are individual
 compressed. This will recursively do the same to directories within the specified directory.
 
 Compressed files are placed in the same directory as the source file, and the
-file name is appended with ".br"
+file name is appended with ".br". If a file already has a ".br" extension, gofile will
+assume the file is already compressed and skip it.
 
 Usage:
 ```shell

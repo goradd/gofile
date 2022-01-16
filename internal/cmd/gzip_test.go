@@ -6,6 +6,7 @@ package cmd
 
 import (
 	ziplib "compress/gzip"
+	"github.com/goradd/gofile/pkg/sys"
 	"github.com/spf13/cobra"
 	"io"
 	"os"
@@ -125,5 +126,29 @@ func TestGZipDir(t *testing.T) {
 
 	if err := os.RemoveAll(dir); err != nil {
 		t.Error(err)
+	}
+}
+
+func TestGZipRecurse(t *testing.T) {
+	dir := filepath.Join(os.TempDir(), "gzipTestDir")
+	if err := os.Mkdir(dir, 0o777); err != nil {
+		// if it already exists from prior failed test, remove it and try again
+		os.Remove(dir)
+		os.Mkdir(dir, 0o777)
+	}
+	defer os.RemoveAll(dir)
+
+	if err := sys.CopyDirectory("testdata", dir, sys.CopyOverwrite); err != nil {
+		t.Fatal(err)
+	}
+
+	cmd, _ := MakeRootCommand()
+	cmd.SetArgs([]string{"gzip", "-v", "-d", dir})
+	if err := cmd.Execute(); err != nil {
+		t.Error(err)
+	}
+
+	if _, err := os.Stat(filepath.Join(dir, "testdata", "copytest", "a", "t1.txt.gz")); err != nil {
+		t.Error("Zip file not created")
 	}
 }

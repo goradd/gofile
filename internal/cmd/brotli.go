@@ -10,6 +10,7 @@ import (
 	"github.com/spf13/cobra"
 	"io"
 	"os"
+	"path/filepath"
 )
 
 func brotli(cmd *cobra.Command, args []string) error {
@@ -22,6 +23,9 @@ func brotli(cmd *cobra.Command, args []string) error {
 
 	for _,f := range files {
 		if err := brotliFile(f); err != nil {
+			if filepath.Ext(f) == ".br" {
+				continue // do not compress a file that is already compressed
+			}
 			return fmt.Errorf("error compressing file %s: %s", f, err.Error())
 		}
 		if deleteAfterZip {

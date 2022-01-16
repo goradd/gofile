@@ -10,6 +10,7 @@ import (
 	"github.com/spf13/cobra"
 	"io"
 	"os"
+	"path/filepath"
 )
 
 func gzip(cmd *cobra.Command, args []string) error {
@@ -22,6 +23,9 @@ func gzip(cmd *cobra.Command, args []string) error {
 
 	for _,f := range files {
 		if err := zipFile(f); err != nil {
+			if filepath.Ext(f) == ".gz" {
+				continue // do not compress a file that is already compressed
+			}
 			return fmt.Errorf("error zipping file %s: %s", f, err.Error())
 		}
 		if deleteAfterZip {
