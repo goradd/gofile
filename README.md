@@ -1,8 +1,8 @@
 # gofile
 
-Gofile is a simple file and directory manipulation tool primarily useful for building go applications and libraries. 
+Gofile is a go module aware file and directory manipulation tool primarily useful for building go applications and libraries. 
 
-Go is module aware, and is cross-platform. Any directory can be represented as a module name,
+Any directory can be represented as a module name,
 followed by a subdirectory and the real path of the module will be substituted for 
 the module name. Path names should use forward slashes to separate directories, and you can substitute 
 environment variables into the path names using $VAR, or ${VAR} syntax.
@@ -63,6 +63,15 @@ gofile -h
 
 will print a complete description of the options and arguments of gofile.
 
+### Path
+Outputs the absolute path of a go module aware path. If the module is not
+found, it outputs the path unchanged.
+
+Usage:
+```shell
+gofile path <src> 
+```
+
 ### Copy
 Copies a file or directory to another file or directory.
 
@@ -80,7 +89,6 @@ an overwrite of previously existing files, and the -n option will overwrite only
 the old one. If you want to replace a previously existing directory, use the remove command described below first.
 
 ### Generate
-
 Runs go generate on the given file.
 
 Usage:
@@ -93,7 +101,6 @@ gofile generate [-x excludes...] <sources...>
 expanding a directory using '*'.
 
 ### Mkdir
-
 Creates the named directory if it does not exist. Sets it to be writable.
 
 Usage:
@@ -102,7 +109,6 @@ gofile mkdir <dest>
 ```
 
 ### Remove
-
 Deletes the named directories or files.
 
 Usage:
