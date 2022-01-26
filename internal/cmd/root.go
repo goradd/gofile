@@ -108,7 +108,15 @@ copying more than one file, the destination must be a directory that exists.`,
 	cmdBrotli.Flags().BoolVarP(&deleteAfterZip, "delete", "d", false, "Compressed source files will be deleted, leaving only the compressed version.")
 	cmdBrotli.Flags().IntVarP(&brotliCompressionLevel, "quality", "q", 11, "The compression level to use. Higher numbers offer higher compression and slower compression speed, and have negligible effect on decompression speed.")
 
-	rootCmd.AddCommand(cmdRemove, cmdGenerate, cmdCopy, cmdMkDir, cmdGZip, cmdBrotli)
+	var cmdPath = &cobra.Command{
+		Use:    "path [path to convert]",
+		Short:  "Converts a module relative path to its absolute path.",
+		Long:   `Converts a module relative path to its absolute path and sends it to stdout.`,
+		Args:   cobra.ExactArgs(1),
+		RunE:   outPath,
+	}
+
+	rootCmd.AddCommand(cmdRemove, cmdGenerate, cmdCopy, cmdMkDir, cmdGZip, cmdBrotli, cmdPath)
 
 	return rootCmd, nil
 }
