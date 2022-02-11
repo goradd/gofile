@@ -6,12 +6,13 @@ package cmd
 
 import (
 	"fmt"
-	"github.com/spf13/cobra"
 	"os"
+
+	"github.com/spf13/cobra"
 )
 
 func mkDir(_ *cobra.Command, _ []string) error {
-	for _,dir := range files {
+	for _, dir := range files {
 		if err := os.MkdirAll(dir, os.FileMode(0777)); err != nil {
 			return err
 		} else if verbose {

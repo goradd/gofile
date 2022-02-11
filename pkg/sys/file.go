@@ -20,7 +20,7 @@ import (
 // not be an issue for most people.
 func SplitList(s string) (list []string) {
 	s = strings.Replace(s, ";", ":", -1)
-	for _,item := range strings.Split(s, ":") {
+	for _, item := range strings.Split(s, ":") {
 		if item != "" {
 			list = append(list, item)
 		}
@@ -46,7 +46,7 @@ func SplitList(s string) (list []string) {
 func ModuleExpandFileList(args []string, modules map[string]string) (list []string) {
 	files2 := make(map[string]bool)
 
-	for _,arg := range args {
+	for _, arg := range args {
 		arg = os.ExpandEnv(arg)
 		arg, _ = GetModulePath(arg, modules)
 		var files []string
@@ -56,7 +56,7 @@ func ModuleExpandFileList(args []string, modules map[string]string) (list []stri
 			files = append(files, arg)
 		}
 
-		for _,f := range files {
+		for _, f := range files {
 			files2[f] = true
 		}
 	}
@@ -104,7 +104,7 @@ const (
 // will be created. If a directory is over-writing another directory, this will determine what happens when
 // file names are duplicates. Note that old files in a directory will not be deleted when a directory
 // overwrites another directory. If you want old files to be deleted, empty the destination directory first.
-func CopyFiles(dst string, overwrite CopyOverwriteType, src... string) (err error) {
+func CopyFiles(dst string, overwrite CopyOverwriteType, src ...string) (err error) {
 	// Sanity checks
 	if dst == "" {
 		return fmt.Errorf("no destination specified")
@@ -113,7 +113,6 @@ func CopyFiles(dst string, overwrite CopyOverwriteType, src... string) (err erro
 	if len(src) == 0 {
 		return fmt.Errorf("no source files specified")
 	}
-
 
 	dstInfo, destErr := os.Stat(dst)
 	srcInfo, srcErr := os.Stat(src[0])
@@ -130,14 +129,14 @@ func CopyFiles(dst string, overwrite CopyOverwriteType, src... string) (err erro
 			return fmt.Errorf("when copying multiple files, the destination must be a directory: %s", dst)
 		}
 
-		for _,f := range src {
+		for _, f := range src {
 			err = copyTo(f, dst, "", overwrite)
 			if err != nil {
 				return
 			}
 		}
 	} else {
-		if os.IsPathSeparator(dst[len(dst) -  1]) {
+		if os.IsPathSeparator(dst[len(dst)-1]) {
 			// Definitely trying to point to a directory
 			if os.IsNotExist(destErr) {
 				return fmt.Errorf("the destination directory does not exist: %s", dst)
@@ -215,7 +214,7 @@ func copyFileTo(src string, destDir string, name string, overwrite CopyOverwrite
 			modSrc := srcInfo.ModTime()
 			modDest := destInfo.ModTime()
 
-			if modSrc.Before(modDest) || modSrc.Equal(modDest)  {
+			if modSrc.Before(modDest) || modSrc.Equal(modDest) {
 				return nil
 			}
 		}
@@ -229,17 +228,16 @@ func copyFileTo(src string, destDir string, name string, overwrite CopyOverwrite
 	if err != nil {
 		return err
 	}
-	defer func () {
+	defer func() {
 		_ = from.Close()
 	}()
-
 
 	to, err := os.OpenFile(destName, os.O_RDWR|os.O_CREATE, perm)
 	if err != nil {
 		return err
 	}
 
-	defer func () {
+	defer func() {
 		_ = to.Close()
 	}()
 
@@ -284,7 +282,6 @@ func copyTo(src string, destDir string, name string, overwrite CopyOverwriteType
 	// src is a directory, and destination is a directory
 	return CopyDirectory(src, destDir, overwrite)
 }
-
 
 // CopyDirectory copies the src directory to the destination directory. The destination directory will be the parent of
 // the resulting directory, and the result will have the same name as the source. If the destination already exists,
@@ -335,7 +332,7 @@ func CopyDirectory(src, dst string, overwrite CopyOverwriteType) (err error) {
 	list, err := f.Readdir(-1)
 	_ = f.Close()
 
-	for _,item := range list {
+	for _, item := range list {
 		itemName := item.Name()
 		itemPath := filepath.Join(src, itemName)
 		err = copyTo(itemPath, newPath, itemName, overwrite)
@@ -398,7 +395,7 @@ func CopyDirectoryEx(src, dst string, overwrite CopyOverwriteType, excludes []st
 	list, err := f.Readdir(-1)
 	_ = f.Close()
 
-	for _,item := range list {
+	for _, item := range list {
 		itemName := item.Name()
 		if isExcluded(itemName, excludes) {
 			continue // skip
@@ -460,7 +457,7 @@ func copyToEx(src string, destDir string, name string, overwrite CopyOverwriteTy
 // will be created. If a directory is over-writing another directory, this will determine what happens when
 // file names are duplicates. Note that old files in a directory will not be deleted when a directory
 // overwrites another directory. If you want old files to be deleted, empty the destination directory first.
-func CopyFilesEx(dst string, overwrite CopyOverwriteType, exclusions []string, src... string) (err error) {
+func CopyFilesEx(dst string, overwrite CopyOverwriteType, exclusions []string, src ...string) (err error) {
 	// Sanity checks
 	if dst == "" {
 		return fmt.Errorf("no destination specified")
@@ -469,7 +466,6 @@ func CopyFilesEx(dst string, overwrite CopyOverwriteType, exclusions []string, s
 	if len(src) == 0 {
 		return fmt.Errorf("no source files specified")
 	}
-
 
 	dstInfo, destErr := os.Stat(dst)
 	srcInfo, srcErr := os.Stat(src[0])
@@ -486,14 +482,14 @@ func CopyFilesEx(dst string, overwrite CopyOverwriteType, exclusions []string, s
 			return fmt.Errorf("when copying multiple files, the destination must be a directory: %s", dst)
 		}
 
-		for _,f := range src {
+		for _, f := range src {
 			err = copyToEx(f, dst, "", overwrite, exclusions)
 			if err != nil {
 				return
 			}
 		}
 	} else {
-		if os.IsPathSeparator(dst[len(dst) -  1]) {
+		if os.IsPathSeparator(dst[len(dst)-1]) {
 			// Definitely trying to point to a directory
 			if os.IsNotExist(destErr) {
 				return fmt.Errorf("the destination directory does not exist: %s", dst)
@@ -544,7 +540,6 @@ func CopyFilesEx(dst string, overwrite CopyOverwriteType, exclusions []string, s
 	}
 	return
 }
-
 
 // IsDir returns true if the given path exists and is a directory
 func IsDir(path string) bool {

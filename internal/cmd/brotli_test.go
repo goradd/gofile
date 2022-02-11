@@ -5,13 +5,13 @@
 package cmd
 
 import (
-	brotlilib "github.com/andybalholm/brotli"
 	"io"
 	"os"
 	"path/filepath"
 	"testing"
-)
 
+	brotlilib "github.com/andybalholm/brotli"
+)
 
 func TestBrotli(t *testing.T) {
 	f := filepath.Join(os.TempDir(), "brotliTest")
@@ -29,8 +29,8 @@ func TestBrotli(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	_,err = os.Stat(fbr)
-	if err != nil  {
+	_, err = os.Stat(fbr)
+	if err != nil {
 		t.Error("Brotli file not created")
 	}
 	var r *os.File
@@ -78,24 +78,23 @@ func TestBrotliDir(t *testing.T) {
 		t.Error(err)
 	}
 
-	if _,err := os.Stat(f); err == nil  {
+	if _, err := os.Stat(f); err == nil {
 		t.Error("Source file not removed")
 	}
 
-	if _,err := os.Stat(fgz); err != nil  {
+	if _, err := os.Stat(fgz); err != nil {
 		t.Error("Brotli file not created")
 	}
-	if _,err := os.Stat(f2gz); err != nil  {
+	if _, err := os.Stat(f2gz); err != nil {
 		t.Error("Brotli file #2 not created")
 	}
 
-	if _,err := os.Stat(f3gz); err == nil  {
+	if _, err := os.Stat(f3gz); err == nil {
 		t.Error("Brotli file #3 was created, but should have been skipped")
 	}
-	if _,err := os.Stat(f3); err != nil  {
+	if _, err := os.Stat(f3); err != nil {
 		t.Error("Source file #3 was removed, but should have been left intact")
 	}
-
 
 	if r, err := os.Open(fgz); err != nil {
 		t.Error(err)
@@ -120,8 +119,7 @@ func TestBrotliDir(t *testing.T) {
 		}
 	}
 
-	if err := os.RemoveAll(dir) ; err != nil {
+	if err := os.RemoveAll(dir); err != nil {
 		t.Error(err)
 	}
 }
-

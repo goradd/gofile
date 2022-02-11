@@ -6,11 +6,12 @@ package cmd
 
 import (
 	"fmt"
-	"github.com/goradd/gofile/pkg/sys"
-	"github.com/spf13/cobra"
 	"io/fs"
 	"os"
 	"path/filepath"
+
+	"github.com/goradd/gofile/pkg/sys"
+	"github.com/spf13/cobra"
 )
 
 var excludes []string
@@ -88,10 +89,10 @@ copying more than one file, the destination must be a directory that exists.`,
 	}
 
 	var cmdGZip = &cobra.Command{
-		Use:   "gzip [files or directories to zip]",
-		Short: "GZip the given files or directories.",
-		Long: `GZips the given files, or all the files in the specified directories, placing zipped files alongside the given files, with .gz suffixes. Uses the maximum compression algorithm.`,
-		Args: cobra.MinimumNArgs(1),
+		Use:    "gzip [files or directories to zip]",
+		Short:  "GZip the given files or directories.",
+		Long:   `GZips the given files, or all the files in the specified directories, placing zipped files alongside the given files, with .gz suffixes. Uses the maximum compression algorithm.`,
+		Args:   cobra.MinimumNArgs(1),
 		PreRun: processExpandedFileListArgs,
 		RunE:   gzip,
 	}
@@ -99,22 +100,22 @@ copying more than one file, the destination must be a directory that exists.`,
 	cmdGZip.Flags().IntVarP(&gzipCompressionLevel, "quality", "q", 9, "The compression level to use. Higher numbers offer higher compression and slower compression speed, but have negligible effect on decompression speed.")
 
 	var cmdBrotli = &cobra.Command{
-		Use:   "brotli [files or directories to compress]",
-		Short: "Brotli compress the given files or directories.",
-		Long: `Compresses the given files with the Brotli method, or all the files in the specified directories, placing compressed files alongside the given files, with .br suffixes.`,
-		Args: cobra.MinimumNArgs(1),
+		Use:    "brotli [files or directories to compress]",
+		Short:  "Brotli compress the given files or directories.",
+		Long:   `Compresses the given files with the Brotli method, or all the files in the specified directories, placing compressed files alongside the given files, with .br suffixes.`,
+		Args:   cobra.MinimumNArgs(1),
 		PreRun: processExpandedFileListArgs,
-		RunE: brotli,
+		RunE:   brotli,
 	}
 	cmdBrotli.Flags().BoolVarP(&deleteAfterZip, "delete", "d", false, "Compressed source files will be deleted, leaving only the compressed version.")
 	cmdBrotli.Flags().IntVarP(&brotliCompressionLevel, "quality", "q", 11, "The compression level to use. Higher numbers offer higher compression and slower compression speed, and have negligible effect on decompression speed.")
 
 	var cmdPath = &cobra.Command{
-		Use:    "path [path to convert]",
-		Short:  "Converts a module relative path to its absolute path.",
-		Long:   `Converts a module relative path to its absolute path and sends it to stdout.`,
-		Args:   cobra.ExactArgs(1),
-		RunE:   outPath,
+		Use:   "path [path to convert]",
+		Short: "Converts a module relative path to its absolute path.",
+		Long:  `Converts a module relative path to its absolute path and sends it to stdout.`,
+		Args:  cobra.ExactArgs(1),
+		RunE:  outPath,
 	}
 
 	rootCmd.AddCommand(cmdRemove, cmdGenerate, cmdCopy, cmdMkDir, cmdGZip, cmdBrotli, cmdPath)

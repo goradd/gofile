@@ -2,10 +2,11 @@ package cmd
 
 import (
 	"bytes"
-	"github.com/spf13/cobra"
 	"path/filepath"
 	"runtime"
 	"testing"
+
+	"github.com/spf13/cobra"
 )
 
 func Test_outPath(t *testing.T) {

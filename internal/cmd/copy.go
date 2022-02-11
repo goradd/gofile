@@ -6,16 +6,17 @@ package cmd
 
 import (
 	"fmt"
+
 	"github.com/goradd/gofile/pkg/sys"
 	"github.com/spf13/cobra"
 )
 
 func copyFiles(cmd *cobra.Command, args []string) error {
 	// Cobra will guarantee we have at least 2 arguments
-	dest := args[len(args) - 1]
+	dest := args[len(args)-1]
 	dest = processFileArg(dest)
 
-	args = args[:len(args) - 1]
+	args = args[:len(args)-1]
 	processFileListArgs(cmd, args) // puts the list of files in the files global
 
 	var overwrite = sys.CopyDoNotOverwrite

@@ -6,11 +6,12 @@ package cmd
 
 import (
 	"fmt"
-	brotlilib "github.com/andybalholm/brotli"
-	"github.com/spf13/cobra"
 	"io"
 	"os"
 	"path/filepath"
+
+	brotlilib "github.com/andybalholm/brotli"
+	"github.com/spf13/cobra"
 )
 
 func brotli(_ *cobra.Command, _ []string) error {
@@ -21,7 +22,7 @@ func brotli(_ *cobra.Command, _ []string) error {
 		return nil
 	}
 
-	for _,f := range files {
+	for _, f := range files {
 		if err := brotliFile(f); err != nil {
 			if filepath.Ext(f) == ".br" {
 				continue // do not compress a file that is already compressed
@@ -50,7 +51,7 @@ func brotliFile(fileName string) error {
 	if err != nil {
 		return err
 	}
-	defer func () {
+	defer func() {
 		_ = f.Close()
 	}()
 
@@ -59,7 +60,7 @@ func brotliFile(fileName string) error {
 	if err != nil {
 		return err
 	}
-	defer func () {
+	defer func() {
 		_ = r.Close()
 	}()
 

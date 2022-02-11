@@ -6,12 +6,13 @@ package cmd
 
 import (
 	ziplib "compress/gzip"
-	"github.com/goradd/gofile/pkg/sys"
-	"github.com/spf13/cobra"
 	"io"
 	"os"
 	"path/filepath"
 	"testing"
+
+	"github.com/goradd/gofile/pkg/sys"
+	"github.com/spf13/cobra"
 )
 
 func TestGZip(t *testing.T) {

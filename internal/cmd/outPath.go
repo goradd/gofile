@@ -6,12 +6,12 @@ package cmd
 
 import (
 	"fmt"
+
 	"github.com/spf13/cobra"
 )
 
 func outPath(cmd *cobra.Command, args []string) error {
 	f := processFileArg(args[0])
-	_,_ = fmt.Fprintf(cmd.OutOrStdout(), f)
+	_, _ = fmt.Fprintf(cmd.OutOrStdout(), f)
 	return nil
 }
-

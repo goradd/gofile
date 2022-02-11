@@ -7,10 +7,11 @@ package cmd
 import (
 	ziplib "compress/gzip"
 	"fmt"
-	"github.com/spf13/cobra"
 	"io"
 	"os"
 	"path/filepath"
+
+	"github.com/spf13/cobra"
 )
 
 func gzip(_ *cobra.Command, _ []string) error {
@@ -21,7 +22,7 @@ func gzip(_ *cobra.Command, _ []string) error {
 		return nil
 	}
 
-	for _,f := range files {
+	for _, f := range files {
 		if err := zipFile(f); err != nil {
 			if filepath.Ext(f) == ".gz" {
 				continue // do not compress a file that is already compressed
@@ -45,7 +46,7 @@ func zipFile(fileName string) error {
 	if err != nil {
 		return err
 	}
-	defer func () {
+	defer func() {
 		_ = f.Close()
 	}()
 
@@ -54,7 +55,7 @@ func zipFile(fileName string) error {
 	if err != nil {
 		return err
 	}
-	defer func () {
+	defer func() {
 		_ = r.Close()
 	}()
 

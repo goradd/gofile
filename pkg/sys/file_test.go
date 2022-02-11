@@ -305,7 +305,6 @@ func TestDirectoryCopyEx(t *testing.T) {
 	}
 }
 
-
 func TestModuleExpandFileList(t *testing.T) {
 	modules, err := ModulePaths()
 	if err != nil {

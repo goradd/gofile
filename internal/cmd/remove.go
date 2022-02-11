@@ -6,12 +6,13 @@ package cmd
 
 import (
 	"fmt"
-	"github.com/spf13/cobra"
 	"os"
+
+	"github.com/spf13/cobra"
 )
 
 func removeFiles(_ *cobra.Command, _ []string) error {
-	for _,f := range files {
+	for _, f := range files {
 		err := os.RemoveAll(f)
 		if err != nil {
 			return err
