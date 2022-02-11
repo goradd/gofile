@@ -6,16 +6,17 @@ package cmd
 
 import (
 	"fmt"
+
 	"github.com/goradd/gofile/pkg/sys"
 	"github.com/spf13/cobra"
 )
 
 var generateResult []byte
 
-func generateFiles(cmd *cobra.Command, args []string) error {
-	for _,f := range files {
+func generateFiles(_ *cobra.Command, _ []string) error {
+	for _, f := range files {
 		var err error
-		generateResult,err = sys.ExecuteShellCommand("go generate " + f)
+		generateResult, err = sys.ExecuteShellCommand("go generate " + f)
 		if err != nil {
 			return err
 		} else if verbose {
@@ -24,4 +25,3 @@ func generateFiles(cmd *cobra.Command, args []string) error {
 	}
 	return nil
 }
-

@@ -6,14 +6,15 @@ package cmd
 
 import (
 	"fmt"
-	brotlilib "github.com/andybalholm/brotli"
-	"github.com/spf13/cobra"
 	"io"
 	"os"
 	"path/filepath"
+
+	brotlilib "github.com/andybalholm/brotli"
+	"github.com/spf13/cobra"
 )
 
-func brotli(cmd *cobra.Command, args []string) error {
+func brotli(_ *cobra.Command, _ []string) error {
 	if len(files) == 0 {
 		if verbose {
 			fmt.Printf("No source files were specified in a gzip operation.")
@@ -21,7 +22,7 @@ func brotli(cmd *cobra.Command, args []string) error {
 		return nil
 	}
 
-	for _,f := range files {
+	for _, f := range files {
 		if err := brotliFile(f); err != nil {
 			if filepath.Ext(f) == ".br" {
 				continue // do not compress a file that is already compressed
@@ -50,14 +51,18 @@ func brotliFile(fileName string) error {
 	if err != nil {
 		return err
 	}
-	defer f.Close()
+	defer func() {
+		_ = f.Close()
+	}()
 
 	var r *os.File
 	r, err = os.Open(fileName)
 	if err != nil {
 		return err
 	}
-	defer r.Close()
+	defer func() {
+		_ = r.Close()
+	}()
 
 	var buf []byte
 	buf, err = io.ReadAll(r)

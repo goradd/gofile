@@ -10,7 +10,6 @@ import (
 	"testing"
 )
 
-
 func TestCopy(t *testing.T) {
 	dir := filepath.Join(os.TempDir(), "gofileTest")
 
@@ -20,7 +19,7 @@ func TestCopy(t *testing.T) {
 	if err != nil {
 		t.Error(err)
 	}
-	info,err := os.Stat(dir)
+	info, err := os.Stat(dir)
 	if err != nil || !info.IsDir() {
 		t.Error("Directory not created")
 	}
@@ -47,11 +46,10 @@ func TestCopy(t *testing.T) {
 		t.Error("File no.abc was copied, but should not have been copied")
 	}
 
-
 	cmd.SetArgs([]string{"remove", "-v", dir})
 	err = cmd.Execute()
 
-	_,err = os.Stat(dir)
+	_, err = os.Stat(dir)
 	if err == nil {
 		t.Error("Directory not removed")
 	}
@@ -60,13 +58,13 @@ func TestCopy(t *testing.T) {
 func TestSubCopy(t *testing.T) {
 	dir := filepath.Join(os.TempDir(), "gofileTest2")
 
-	cmd,err := MakeRootCommand()
+	cmd, err := MakeRootCommand()
 	cmd.SetArgs([]string{"mkdir", dir})
 	err = cmd.Execute()
 	if err != nil {
 		t.Error(err)
 	}
-	info,err := os.Stat(dir)
+	info, err := os.Stat(dir)
 	if err != nil || !info.IsDir() {
 		t.Error("Directory not created")
 	}
@@ -86,7 +84,7 @@ func TestSubCopy(t *testing.T) {
 	cmd.SetArgs([]string{"remove", dir})
 	err = cmd.Execute()
 
-	_,err = os.Stat(dir)
+	_, err = os.Stat(dir)
 	if err == nil {
 		t.Error("Directory not removed")
 	}
@@ -124,4 +122,3 @@ func TestModuleDirectoryCopy(t *testing.T) {
 		t.Fatal("test directory not detected")
 	}
 }*/
-

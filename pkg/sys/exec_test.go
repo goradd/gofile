@@ -9,12 +9,11 @@ import (
 	"testing"
 )
 
-
 func TestModules(t *testing.T) {
 
 	// since modules are very dependent on the environment, this is mostly just
 	// a sanity check that it works without errors.
-	modules,err := ModulePaths()
+	modules, err := ModulePaths()
 	if err != nil {
 		t.Fatal(err)
 		return
@@ -32,34 +31,40 @@ func TestModules(t *testing.T) {
 }
 
 func TestSplitCommandParts(t *testing.T) {
-	parts,err := splitCommandParts("a b c")
+	parts, err := splitCommandParts("a b c")
 	if fmt.Sprint(parts) != "[a b c]" || err != nil {
 		t.Error(fmt.Sprint(parts))
 	}
 
-	parts,err = splitCommandParts("ab bc cd")
+	parts, err = splitCommandParts("ab bc cd")
 	if fmt.Sprint(parts) != "[ab bc cd]" || err != nil {
 		t.Error(fmt.Sprint(parts))
 	}
 
-	parts,err = splitCommandParts(`"ab bc cd"`)
+	parts, err = splitCommandParts(`"ab bc cd"`)
 	if len(parts) != 1 || fmt.Sprint(parts) != "[ab bc cd]" || err != nil {
 		t.Error(fmt.Sprint(parts))
 	}
 
-	parts,err = splitCommandParts(`'ab bc cd"'`)
+	parts, err = splitCommandParts(`'ab bc cd"'`)
 	if len(parts) != 1 || fmt.Sprint(parts) != `[ab bc cd"]` || err != nil {
 		t.Error(fmt.Sprint(parts))
 	}
 
-	parts,err = splitCommandParts(`ab 'b c' cd`)
+	parts, err = splitCommandParts(`ab 'b c' cd`)
 	if len(parts) != 3 || fmt.Sprint(parts) != `[ab b c cd]` || err != nil {
 		t.Error(fmt.Sprint(parts))
 	}
 
-	parts,err = splitCommandParts(`ab'b c'cd`)
+	parts, err = splitCommandParts(`ab'b c'cd`)
 	if len(parts) != 1 || fmt.Sprint(parts) != `[abb ccd]` || err != nil {
 		t.Error(fmt.Sprint(parts))
 	}
 }
 
+func TestExecuteShellCommand(t *testing.T) {
+	_,err := ExecuteShellCommand(`abc "`)
+	if err == nil {
+		t.Error("error expected")
+	}
+}
