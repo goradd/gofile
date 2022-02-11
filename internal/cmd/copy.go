@@ -18,7 +18,7 @@ func copyFiles(cmd *cobra.Command, args []string) error {
 	args = args[:len(args) - 1]
 	processFileListArgs(cmd, args) // puts the list of files in the files global
 
-	var overwrite sys.CopyOverwriteType = sys.CopyDoNotOverwrite
+	var overwrite = sys.CopyDoNotOverwrite
 
 	if copyOverwrite {
 		overwrite = sys.CopyOverwrite

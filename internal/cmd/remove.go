@@ -10,7 +10,7 @@ import (
 	"os"
 )
 
-func removeFiles(cmd *cobra.Command, args []string) error {
+func removeFiles(_ *cobra.Command, _ []string) error {
 	for _,f := range files {
 		err := os.RemoveAll(f)
 		if err != nil {

@@ -77,11 +77,6 @@ type pathType11 struct {
 	Dir string
 }
 
-type pathType10 struct {
-	ImportPath string
-	Dir string
-}
-
 
 // ModulePaths returns a listing of the paths of all the modules included in the go.mod file,
 // keyed by module name, from the perspective of the
@@ -100,7 +95,7 @@ func ModulePaths() (ret map[string]string, err error) {
 			dec := json.NewDecoder(bytes.NewReader(outText))
 			for {
 				var v pathType11
-				if err := dec.Decode(&v); err != nil {
+				if err = dec.Decode(&v); err != nil {
 					if err == io.EOF {
 						break
 					}

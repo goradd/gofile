@@ -82,8 +82,11 @@ func hasMeta(path string) bool {
 type CopyOverwriteType int
 
 const (
+	// CopyDoNotOverwrite will prevent copying if the destination file already exists
 	CopyDoNotOverwrite CopyOverwriteType = 0
+	// CopyOverwrite will cause the destination to be replaced if it exists
 	CopyOverwrite = 1
+	// CopyOverwriteOnlyIfNewer will cause the destination to be overwritten only if the source is newer than the destination.
 	CopyOverwriteOnlyIfNewer = 2
 )
 
@@ -153,7 +156,7 @@ func CopyFiles(dst string, overwrite CopyOverwriteType, src... string) (err erro
 				parentDir, fileName := filepath.Split(dst)
 				_, parentErr := os.Stat(parentDir)
 				if parentErr != nil {
-					return fmt.Errorf("The parent directory of a new file must exist: %s", dst)
+					return fmt.Errorf("the parent directory of a new file must exist: %s", dst)
 				}
 				// We are writing to a new file
 				err = copyFileTo(src[0], parentDir, fileName, overwrite)
@@ -180,11 +183,10 @@ func CopyFiles(dst string, overwrite CopyOverwriteType, src... string) (err erro
 	return
 }
 
-// copyFileTo copies the given file to the destination directory. If a name is given, it will rename the file.
-// It does no checks to see if the destination directory exists. If the file exists, it will
-// replace it using the same permission bits as the destination. If it doesn't exist, it will
-// use 644.
-// If the overwrite value would prevent the file from being copied, then the copy does not happen and
+// copyFileTo copies the given file to the destination directory.
+//If a name is given, it will rename the file.
+// It does no checks to see if the destination directory exists.
+// overwrite would prevent the file from being copied, then the copy does not happen and
 // error is nil.
 func copyFileTo(src string, destDir string, name string, overwrite CopyOverwriteType) error {
 	var count int64
@@ -197,6 +199,8 @@ func copyFileTo(src string, destDir string, name string, overwrite CopyOverwrite
 		return fmt.Errorf(`source "%s"" is not a file`, src)
 	}
 	var perm os.FileMode
+
+	perm = srcInfo.Mode() & os.ModePerm
 
 	if name == "" {
 		name = filepath.Base(src)
@@ -215,27 +219,29 @@ func copyFileTo(src string, destDir string, name string, overwrite CopyOverwrite
 				return nil
 			}
 		}
-
-		perm = destInfo.Mode() & os.ModePerm
-	} else {
-		// destination does not exist
-		//perm = srcInfo.Mode() & os.ModePerm
-		perm = 0644
-
+		// prepare for copy by deleting in case permissions are different
+		if err := os.Remove(destName); err != nil {
+			return err
+		}
 	}
 
 	from, err := os.Open(src)
 	if err != nil {
 		return err
 	}
-	defer from.Close()
+	defer func () {
+		_ = from.Close()
+	}()
+
 
 	to, err := os.OpenFile(destName, os.O_RDWR|os.O_CREATE, perm)
 	if err != nil {
 		return err
 	}
 
-	defer to.Close()
+	defer func () {
+		_ = to.Close()
+	}()
 
 	count, err = io.Copy(to, from)
 	if err != nil {
@@ -506,7 +512,7 @@ func CopyFilesEx(dst string, overwrite CopyOverwriteType, exclusions []string, s
 				parentDir, fileName := filepath.Split(dst)
 				_, parentErr := os.Stat(parentDir)
 				if parentErr != nil {
-					return fmt.Errorf("The parent directory of a new file must exist: %s", dst)
+					return fmt.Errorf("the parent directory of a new file must exist: %s", dst)
 				}
 				// We are writing to a new file
 				if isExcluded(src[0], exclusions) {

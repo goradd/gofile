@@ -24,6 +24,7 @@ var deleteAfterZip bool
 var gzipCompressionLevel int
 var brotliCompressionLevel int
 
+// MakeRootCommand creates the command tree for cobra.
 func MakeRootCommand() (*cobra.Command, error) {
 	var err error
 
@@ -36,7 +37,7 @@ func MakeRootCommand() (*cobra.Command, error) {
 		Use:   "gofile",
 		Short: "gofile is a module-aware, cross-platform, go file manipulation tool",
 		Long: `gofile is a module-aware, cross-platform, go file manipulation tool.
-After each command, list a file, or group of files to process. In each file description, you can
+After each command, specify a file or group of files to process. In each file description, you can
 use standard GLOB identifiers (like * to match any string). If an identifier starts with a module
 identifier (e.g. github.com/repo/proj), gofile will look for that file or directory in the module
 specified. Environment variables can be specified with $NAME or ${NAME}. Separate paths with
@@ -121,7 +122,7 @@ copying more than one file, the destination must be a directory that exists.`,
 	return rootCmd, nil
 }
 
-func processExclude(cmd *cobra.Command, args []string) {
+func processExclude(_ *cobra.Command, _ []string) {
 	exclude = os.ExpandEnv(exclude)
 	excludes = sys.SplitList(exclude)
 }
@@ -129,7 +130,7 @@ func processExclude(cmd *cobra.Command, args []string) {
 // processFileListArgs accepts the group of arguments that would represent files, directories
 // etc., processes them, removes excluded files, and sets the files global to this list
 // non-existent names are left intact so that we can create them.
-func processFileListArgs(cmd *cobra.Command, args []string) {
+func processFileListArgs(_ *cobra.Command, args []string) {
 	files2 := sys.ModuleExpandFileList(args, modules)
 
 	if excludes == nil {
@@ -154,7 +155,7 @@ Files2:
 // etc., expands the list based on the current modules, expands directories to the list of files in those
 // directories, removes excluded files, and sets the files global to this list.
 // non-existent names are removed
-func processExpandedFileListArgs(cmd *cobra.Command, args []string) {
+func processExpandedFileListArgs(_ *cobra.Command, args []string) {
 	files2 := sys.ModuleExpandFileList(args, modules)
 
 	files = nil

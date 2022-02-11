@@ -13,7 +13,7 @@ import (
 	"path/filepath"
 )
 
-func gzip(cmd *cobra.Command, args []string) error {
+func gzip(_ *cobra.Command, _ []string) error {
 	if len(files) == 0 {
 		if verbose {
 			fmt.Printf("No source files were specified in a gzip operation.")
@@ -45,14 +45,18 @@ func zipFile(fileName string) error {
 	if err != nil {
 		return err
 	}
-	defer f.Close()
+	defer func () {
+		_ = f.Close()
+	}()
 
 	var r *os.File
 	r, err = os.Open(fileName)
 	if err != nil {
 		return err
 	}
-	defer r.Close()
+	defer func () {
+		_ = r.Close()
+	}()
 
 	var buf []byte
 	buf, err = io.ReadAll(r)

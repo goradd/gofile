@@ -10,7 +10,7 @@ import (
 	"os"
 )
 
-func mkDir(cmd *cobra.Command, args []string) error {
+func mkDir(_ *cobra.Command, _ []string) error {
 	for _,dir := range files {
 		if err := os.MkdirAll(dir, os.FileMode(0777)); err != nil {
 			return err

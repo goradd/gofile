@@ -12,7 +12,7 @@ import (
 
 var generateResult []byte
 
-func generateFiles(cmd *cobra.Command, args []string) error {
+func generateFiles(_ *cobra.Command, _ []string) error {
 	for _,f := range files {
 		var err error
 		generateResult,err = sys.ExecuteShellCommand("go generate " + f)
