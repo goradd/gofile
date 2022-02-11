@@ -1,3 +1,4 @@
+![Build Status](https://img.shields.io/github/workflow/status/goradd/gofile/Go)
 # gofile
 
 Gofile is a go module aware file and directory manipulation tool primarily useful for building go applications and libraries. 
