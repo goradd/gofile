@@ -61,3 +61,10 @@ func TestSplitCommandParts(t *testing.T) {
 		t.Error(fmt.Sprint(parts))
 	}
 }
+
+func TestExecuteShellCommand(t *testing.T) {
+	_,err := ExecuteShellCommand(`abc "`)
+	if err == nil {
+		t.Error("error expected")
+	}
+}

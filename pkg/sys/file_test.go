@@ -12,21 +12,38 @@ import (
 	"time"
 )
 
-func TestCopyFile(t *testing.T) {
-	dir, err := os.UserCacheDir()
+func makeTempDir() (dir string, err error) {
+	dir, err = os.UserCacheDir()
 	if err != nil {
 		dir = os.TempDir()
 	}
 	dir = filepath.Join(dir, "gofileTest")
 	err = os.Mkdir(dir, 0777)
 	if err != nil {
-		os.RemoveAll(dir)
+		_ = os.RemoveAll(dir)
+		return
+	}
+	return
+}
+
+func testDataDir1() string {
+	return filepath.Join("testdata", "dir1")
+}
+func testDataDir2() string {
+	return filepath.Join("testdata", "dir2")
+}
+
+
+
+func TestCopyFile(t *testing.T) {
+	tempDir, err := makeTempDir()
+	if err != nil {
 		t.Fatal(err)
 		return
 	}
-	defer os.RemoveAll(dir)
+	defer os.RemoveAll(tempDir)
 
-	src := filepath.Join(dir, "test.txt")
+	src := filepath.Join(tempDir, "test.txt")
 
 	testContent := "I am a test \n and the 2nd line"
 
@@ -34,7 +51,7 @@ func TestCopyFile(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	dst := filepath.Join(dir, "test2.txt")
+	dst := filepath.Join(tempDir, "test2.txt")
 
 	time.Sleep(2 * time.Second) // delay to make sure file is created later
 
@@ -52,7 +69,7 @@ func TestCopyFile(t *testing.T) {
 
 	// test grow
 	testContent2 := "I am a test \n and the 2nd line\nand a 3rd"
-	src2 := filepath.Join(dir, "test2-2.txt")
+	src2 := filepath.Join(tempDir, "test2-2.txt")
 	err = ioutil.WriteFile(src2, []byte(testContent2), 0755)
 	if err != nil {
 		t.Fatal(err)
@@ -100,7 +117,7 @@ func TestCopyFile(t *testing.T) {
 
 	// test shrink of file after copying over
 	testContent3 := "I am a smaller test"
-	src3 := filepath.Join(dir, "test3.txt")
+	src3 := filepath.Join(tempDir, "test3.txt")
 	err = ioutil.WriteFile(src3, []byte(testContent3), 0755)
 
 	err = CopyFiles(dst, CopyOverwrite, src3)
@@ -116,12 +133,12 @@ func TestCopyFile(t *testing.T) {
 	dst2 := filepath.Join(os.TempDir(), "gofileTest2")
 	defer os.RemoveAll(dst2)
 
-	err = CopyFiles(dst2, CopyDoNotOverwrite, dir)
+	err = CopyFiles(dst2, CopyDoNotOverwrite, tempDir)
 	if err == nil {
 		t.Error("Copying a directory to a non-existant location should fail")
 	}
 
-	err = CopyFiles(dst2+"/", CopyDoNotOverwrite, dir)
+	err = CopyFiles(dst2+string(filepath.Separator), CopyDoNotOverwrite, src)
 	if err == nil {
 		t.Error("Copying a directory to a non-existant location should fail")
 	}
@@ -131,7 +148,7 @@ func TestCopyFile(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	err = CopyFiles(dst2, CopyDoNotOverwrite, dir)
+	err = CopyFiles(dst2, CopyDoNotOverwrite, tempDir)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -143,19 +160,51 @@ func TestCopyFile(t *testing.T) {
 
 	// Now copy individual items
 	var items2 []string
-	items, _ = ioutil.ReadDir(dir)
+	items, _ = ioutil.ReadDir(tempDir)
 	for _, item := range items {
-		items2 = append(items2, filepath.Join(dir, item.Name()))
+		items2 = append(items2, filepath.Join(tempDir, item.Name()))
 	}
 	err = CopyFiles(dst2, CopyDoNotOverwrite, items2...)
 	if err != nil {
 		t.Fatal(err)
 	}
-
 	items, _ = ioutil.ReadDir(dst2)
 	if len(items) != 5 {
 		t.Error("Items were not copied")
 	}
+
+	_ = os.RemoveAll(dst2)
+	_ = os.Mkdir(dst2, 0777)
+
+	err = CopyFiles(dst2+ string(filepath.Separator), CopyOverwrite, src)
+	if err != nil {
+		t.Fatal(err)
+	}
+	items, _ = ioutil.ReadDir(dst2)
+	if items[0].Name() != "test.txt" {
+		t.Fatal("First item in directory is not gofileTest")
+	}
+
+
+	// Check some error states
+	err = CopyFiles("", CopyDoNotOverwrite, items2...)
+	if err == nil {
+		t.Error("Error expected")
+	}
+	err = CopyFiles(dst2, CopyDoNotOverwrite, "")
+	if err == nil {
+		t.Error("Error expected")
+	}
+	err = CopyFiles(dst2, CopyDoNotOverwrite, "random")
+	if err == nil {
+		t.Error("Error expected")
+	}
+	err = CopyFiles(src3, CopyDoNotOverwrite, items2...)
+	if err == nil {
+		t.Error("Error expected")
+	}
+
+
 }
 
 func TestDirectoryCopy(t *testing.T) {
@@ -340,4 +389,252 @@ func listContains(list []string, val string) bool {
 		}
 	}
 	return false
+}
+
+func Test_copyFileTo(t *testing.T) {
+	dir, err := makeTempDir()
+	if err != nil {
+		t.Fatal(err)
+		return
+	}
+	defer os.RemoveAll(dir)
+
+	src := filepath.Join(dir, "test.txt")
+
+	testContent := "I am a test \n and the 2nd line"
+
+	err = ioutil.WriteFile(src, []byte(testContent), 0755)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	type args struct {
+		src       string
+		destDir   string
+		name      string
+		overwrite CopyOverwriteType
+	}
+	tests := []struct {
+		name    string
+		args    args
+		wantErr bool
+	}{
+		{"bad src", args{src: "random", destDir:"random", name:"random", overwrite: CopyOverwrite}, true},
+		{"bad dest", args{src: dir, destDir:"random", name:"random", overwrite: CopyOverwrite}, true},
+		{"copy once", args{src: src, destDir:dir, name:"test2", overwrite: CopyOverwrite}, false},
+		{"copy twice", args{src: src, destDir:dir, name:"test2", overwrite: CopyOverwrite}, false},
+		{"copy no overwrite", args{src: src, destDir:dir, name:"test2", overwrite: CopyDoNotOverwrite}, false},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if err := copyFileTo(tt.args.src, tt.args.destDir, tt.args.name, tt.args.overwrite); (err != nil) != tt.wantErr {
+				t.Errorf("copyFileTo() error = %v, wantErr %v", err, tt.wantErr)
+			}
+		})
+	}
+}
+
+func TestCopyFilesExErrors(t *testing.T) {
+	type args struct {
+		dst        string
+		overwrite  CopyOverwriteType
+		exclusions []string
+		src        []string
+	}
+	tests := []struct {
+		name    string
+		args    args
+		wantErr bool
+	}{
+		{"no source",args{testDataDir1(), CopyDoNotOverwrite,[]string{},[]string{}}, true},
+		{"no dest",args{"", CopyDoNotOverwrite,[]string{},[]string{testDataDir1()}}, true},
+		{"bad src",args{testDataDir1(), CopyDoNotOverwrite,[]string{},[]string{"random"}}, true},
+		{"bad dest",args{"random", CopyDoNotOverwrite,[]string{},[]string{filepath.Join("testdata","t1.txt"), filepath.Join("testdata","t2.txt")}}, true},
+		{"file dest",args{filepath.Join("testdata","t1.txt"), CopyDoNotOverwrite,[]string{},[]string{testDataDir1()}}, true},
+		{"bad dir dest",args{"random1/", CopyDoNotOverwrite,[]string{},[]string{filepath.Join("testdata","t1.txt")}}, true},
+		{"bad parent dir",args{"random1/bad2", CopyDoNotOverwrite,[]string{},[]string{filepath.Join("testdata","t1.txt")}}, true},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if err := CopyFilesEx(tt.args.dst, tt.args.overwrite, tt.args.exclusions, tt.args.src...); (err != nil) != tt.wantErr {
+				t.Errorf("CopyFilesEx() error = %v, wantErr %v", err, tt.wantErr)
+			}
+		})
+	}
+}
+
+func TestCopyFilesEx(t *testing.T) {
+
+	t.Run("copy dir", func(t *testing.T) {
+		tempDir, err := makeTempDir()
+		if err != nil {
+			t.Fatal(err)
+			return
+		}
+		defer os.RemoveAll(tempDir)
+
+		if err = CopyFilesEx(tempDir, CopyOverwrite, []string{"*.abc"}, filepath.Join(testDataDir1(), "a")); (err != nil) {
+			t.Errorf("CopyFilesEx() error = %v", err)
+		}
+		items, _ := ioutil.ReadDir(tempDir)
+		if len(items) != 1 {
+			t.Errorf("CopyFilesEx() did not copy correct number of directories. Wanted 1, found %d", len(items))
+		}
+
+		items, _ = ioutil.ReadDir(filepath.Join(tempDir, "a"))
+		if len(items) != 2 {
+			t.Errorf("CopyFilesEx() did not copy correct number of files. Wanted 2, found %d", len(items))
+		}
+
+	})
+
+	t.Run("copy one", func(t *testing.T) {
+		tempDir, err := makeTempDir()
+		if err != nil {
+			t.Fatal(err)
+			return
+		}
+		defer os.RemoveAll(tempDir)
+
+		if err = CopyFilesEx(tempDir + string(filepath.Separator), CopyOverwrite, []string{"*.abc"}, filepath.Join("testdata", "t1.txt")); (err != nil) {
+			t.Errorf("CopyFilesEx() error = %v", err)
+		}
+		items, _ := ioutil.ReadDir(tempDir)
+		if len(items) != 1 {
+			t.Errorf("CopyFilesEx() did not copy correct number of items. Wanted 1, found %d", len(items))
+		}
+	})
+
+	t.Run("copy sub", func(t *testing.T) {
+		tempDir, err := makeTempDir()
+		if err != nil {
+			t.Fatal(err)
+			return
+		}
+		defer os.RemoveAll(tempDir)
+
+		if err = CopyFilesEx(filepath.Join(tempDir, "test1"), CopyOverwrite, []string{"*.abc"}, filepath.Join("testdata", "t1.txt")); (err != nil) {
+			t.Errorf("CopyFilesEx() error = %v", err)
+		}
+		items, _ := ioutil.ReadDir(tempDir)
+		if len(items) != 1 {
+			t.Errorf("CopyFilesEx() did not copy correct number of items. Wanted 1, found %d", len(items))
+		}
+	})
+
+	t.Run("copy sub excluded", func(t *testing.T) {
+		tempDir, err := makeTempDir()
+		if err != nil {
+			t.Fatal(err)
+			return
+		}
+		defer os.RemoveAll(tempDir)
+
+		if err = CopyFilesEx(filepath.Join(tempDir, "test1"), CopyOverwrite, []string{"*.abc"}, filepath.Join("testdata", "t3.abc")); (err != nil) {
+			t.Errorf("CopyFilesEx() error = %v", err)
+		}
+		items, _ := ioutil.ReadDir(tempDir)
+		if len(items) != 0 {
+			t.Errorf("CopyFilesEx() did not copy correct number of items. Wanted 0, found %d", len(items))
+		}
+	})
+	t.Run("copy sub excluded", func(t *testing.T) {
+		tempDir, err := makeTempDir()
+		if err != nil {
+			t.Fatal(err)
+			return
+		}
+		defer os.RemoveAll(tempDir)
+
+		if err = CopyFilesEx(filepath.Join(tempDir, "test1"), CopyOverwrite, []string{"*.abc"}, filepath.Join("testdata", "t3.abc")); (err != nil) {
+			t.Errorf("CopyFilesEx() error = %v", err)
+		}
+		items, _ := ioutil.ReadDir(tempDir)
+		if len(items) != 0 {
+			t.Errorf("CopyFilesEx() did not copy correct number of items. Wanted 0, found %d", len(items))
+		}
+	})
+
+	t.Run("copy file exists", func(t *testing.T) {
+		tempDir, err := makeTempDir()
+		if err != nil {
+			t.Fatal(err)
+			return
+		}
+		defer os.RemoveAll(tempDir)
+
+		if err = CopyFilesEx(filepath.Join(tempDir, "test1"), CopyOverwrite, []string{"*.abc"}, filepath.Join("testdata", "t1.txt")); (err != nil) {
+			t.Errorf("CopyFilesEx() error = %v", err)
+		}
+		items, _ := ioutil.ReadDir(tempDir)
+		if len(items) != 1 {
+			t.Errorf("CopyFilesEx() did not copy correct number of items. Wanted 1, found %d", len(items))
+		}
+
+		if err = CopyFilesEx(filepath.Join(tempDir, "test1"), CopyOverwrite, []string{"*.abc"}, filepath.Join("testdata", "t1.txt")); (err != nil) {
+			t.Errorf("CopyFilesEx() error = %v", err)
+		}
+		items, _ = ioutil.ReadDir(tempDir)
+		if len(items) != 1 {
+			t.Errorf("CopyFilesEx() did not copy correct number of items. Wanted 1, found %d", len(items))
+		}
+
+	})
+
+
+	t.Run("copy one to dir existing", func(t *testing.T) {
+		tempDir, err := makeTempDir()
+		if err != nil {
+			t.Fatal(err)
+			return
+		}
+		defer os.RemoveAll(tempDir)
+
+		if err = CopyFilesEx(tempDir, CopyOverwrite, []string{"*.abc"}, filepath.Join("testdata", "t1.txt")); (err != nil) {
+			t.Errorf("CopyFilesEx() error = %v", err)
+		}
+		items, _ := ioutil.ReadDir(tempDir)
+		if len(items) != 1 {
+			t.Errorf("CopyFilesEx() did not copy correct number of directories. Wanted 1, found %d", len(items))
+		}
+
+		if err = CopyFilesEx(tempDir, CopyOverwrite, []string{"*.abc"}, filepath.Join("testdata", "t1.txt")); (err != nil) {
+			t.Errorf("CopyFilesEx() error = %v", err)
+		}
+		items, _ = ioutil.ReadDir(tempDir)
+		if len(items) != 1 {
+			t.Errorf("CopyFilesEx() did not copy correct number of directories. Wanted 1, found %d", len(items))
+		}
+
+
+	})
+
+	t.Run("copy one to dir existing excluded", func(t *testing.T) {
+		tempDir, err := makeTempDir()
+		if err != nil {
+			t.Fatal(err)
+			return
+		}
+		defer os.RemoveAll(tempDir)
+
+		if err = CopyFilesEx(tempDir, CopyOverwrite, []string{}, filepath.Join("testdata", "t1.txt")); (err != nil) {
+			t.Errorf("CopyFilesEx() error = %v", err)
+		}
+		items, _ := ioutil.ReadDir(tempDir)
+		if len(items) != 1 {
+			t.Errorf("CopyFilesEx() did not copy correct number of directories. Wanted 1, found %d", len(items))
+		}
+
+		if err = CopyFilesEx(tempDir, CopyOverwrite, []string{"*.txt"}, filepath.Join("testdata", "t2.txt")); (err != nil) {
+			t.Errorf("CopyFilesEx() error = %v", err)
+		}
+		items, _ = ioutil.ReadDir(tempDir)
+		if len(items) != 1 {
+			t.Errorf("CopyFilesEx() did not copy correct number of directories. Wanted 1, found %d", len(items))
+		}
+
+	})
+
+
 }

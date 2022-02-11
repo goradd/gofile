@@ -110,7 +110,7 @@ func CopyFiles(dst string, overwrite CopyOverwriteType, src ...string) (err erro
 		return fmt.Errorf("no destination specified")
 	}
 
-	if len(src) == 0 {
+	if len(src) == 0 || src[0] == "" {
 		return fmt.Errorf("no source files specified")
 	}
 
@@ -188,8 +188,6 @@ func CopyFiles(dst string, overwrite CopyOverwriteType, src ...string) (err erro
 // overwrite would prevent the file from being copied, then the copy does not happen and
 // error is nil.
 func copyFileTo(src string, destDir string, name string, overwrite CopyOverwriteType) error {
-	var count int64
-
 	srcInfo, srcErr := os.Stat(src)
 	if srcErr != nil {
 		return srcErr
@@ -241,13 +239,9 @@ func copyFileTo(src string, destDir string, name string, overwrite CopyOverwrite
 		_ = to.Close()
 	}()
 
-	count, err = io.Copy(to, from)
+	_, err = io.Copy(to, from)
 	if err != nil {
 		//to.Close()
-		return err
-	}
-	err = to.Truncate(count) // chop end of file in case file gets smaller
-	if err != nil {
 		return err
 	}
 
@@ -526,10 +520,10 @@ func CopyFilesEx(dst string, overwrite CopyOverwriteType, exclusions []string, s
 						return
 					}
 				} else {
-					parentDir, fileName := filepath.Split(dst)
 					if isExcluded(src[0], exclusions) {
 						return nil
 					}
+					parentDir, fileName := filepath.Split(dst)
 					err = copyTo(src[0], parentDir, fileName, overwrite)
 					if err != nil {
 						return

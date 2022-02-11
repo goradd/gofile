@@ -82,8 +82,7 @@ type pathType11 struct {
 // keyed by module name, from the perspective of the
 // current working directory.
 //
-// If we are running without module support, it will return only the top paths to packages, since everything in this
-// situation will be relative to GOPATH.
+// If we are running without module support, it will return an error.
 func ModulePaths() (ret map[string]string, err error) {
 	var outText []byte
 
