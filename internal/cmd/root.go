@@ -200,6 +200,8 @@ func isExcluded(file string) bool {
 func processFileArg(arg string) string {
 	arg = os.ExpandEnv(arg)
 	arg2, _ := sys.GetModulePath(arg, modules)
+	arg2 = filepath.FromSlash(arg2)
+
 	if verbose && arg2 != arg {
 		fmt.Printf("module path " + arg + " found at " + arg2)
 	}

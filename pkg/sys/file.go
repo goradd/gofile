@@ -31,10 +31,12 @@ func SplitList(s string) (list []string) {
 // ModuleExpandFileList will do the following given a list of arguments that represent command line arguments
 // that would be a list of
 // files, directories, or glob patterns:
-//   replace any environment variables with their values
-//   replace any items that start with a module with the actual location on disk
-//   expand any glob patterns
-//   remove duplicates
+//
+//	replace any environment variables with their values
+//	replace any items that start with a module with the actual location on disk
+//	expand any glob patterns
+//	remove duplicates
+//
 // It will return the final list.
 //
 // modules is the list of modules returned from ModulePaths.
@@ -49,8 +51,9 @@ func ModuleExpandFileList(args []string, modules map[string]string) (list []stri
 	for _, arg := range args {
 		arg = os.ExpandEnv(arg)
 		arg, _ = GetModulePath(arg, modules)
+		arg = filepath.FromSlash(arg)
 		var files []string
-		if hasMeta(arg) {
+		if HasMeta(arg) {
 			files, _ = filepath.Glob(arg)
 		} else {
 			files = append(files, arg)
@@ -66,10 +69,10 @@ func ModuleExpandFileList(args []string, modules map[string]string) (list []stri
 	return
 }
 
-// hasMeta reports whether path contains any of the magic characters
+// HasMeta reports whether path contains any of the magic characters
 // recognized by Match.
-// This is an copied from the unexported function from filepath.
-func hasMeta(path string) bool {
+// This is copied from the unexported function from filepath.
+func HasMeta(path string) bool {
 	magicChars := `*?[`
 	if runtime.GOOS != "windows" {
 		magicChars = `*?[\`
@@ -98,8 +101,9 @@ const (
 // If there is only one source, the destination must be:
 //   - A directory that exists, in which case the source will be placed in the destination directory
 //   - A file that exists, in which case the source will overwrite the destination. The source must also be a single file.
-//	 - A file that does not exist, but whose parent directory does exist, in which case the file will be copied
+//   - A file that does not exist, but whose parent directory does exist, in which case the file will be copied
 //     and renamed to the destination.
+//
 // If overwrite is true, files that already exist will be overwritten. If overwrite is false, only new files
 // will be created. If a directory is over-writing another directory, this will determine what happens when
 // file names are duplicates. Note that old files in a directory will not be deleted when a directory
@@ -183,7 +187,7 @@ func CopyFiles(dst string, overwrite CopyOverwriteType, src ...string) (err erro
 }
 
 // copyFileTo copies the given file to the destination directory.
-//If a name is given, it will rename the file.
+// If a name is given, it will rename the file.
 // It does no checks to see if the destination directory exists.
 // overwrite would prevent the file from being copied, then the copy does not happen and
 // error is nil.
@@ -445,8 +449,9 @@ func copyToEx(src string, destDir string, name string, overwrite CopyOverwriteTy
 // If there is only one source, the destination must be:
 //   - A directory that exists, in which case the source will be placed in the destination directory
 //   - A file that exists, in which case the source will overwrite the destination. The source must also be a single file.
-//	 - A file that does not exist, but whose parent directory does exist, in which case the file will be copied
+//   - A file that does not exist, but whose parent directory does exist, in which case the file will be copied
 //     and renamed to the destination.
+//
 // If overwrite is true, files that already exist will be overwritten. If overwrite is false, only new files
 // will be created. If a directory is over-writing another directory, this will determine what happens when
 // file names are duplicates. Note that old files in a directory will not be deleted when a directory
@@ -535,7 +540,7 @@ func CopyFilesEx(dst string, overwrite CopyOverwriteType, exclusions []string, s
 	return
 }
 
-// IsDir returns true if the given path exists and is a directory
+// IsDir returns true if the given path exists and is a directory.
 func IsDir(path string) bool {
 	dstInfo, err := os.Stat(path)
 	if err == nil { // file exists
