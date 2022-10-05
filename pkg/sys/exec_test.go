@@ -6,6 +6,7 @@ package sys
 
 import (
 	"fmt"
+	"path/filepath"
 	"testing"
 )
 
@@ -27,6 +28,26 @@ func TestModules(t *testing.T) {
 
 	if newPath == "github.com/goradd/gofile/modules" {
 		t.Error("Module path was not changed to an absolute path")
+	}
+
+	newPath, err = GetModulePath("github.com/goradd/gofile/*/modules", modules)
+	if err != nil {
+		t.Fatal(err)
+		return
+	}
+
+	if newPath == "github.com/goradd/gofile/*/modules" {
+		t.Error("Module path was not changed to an absolute path")
+	}
+
+	var newPath2 string
+	newPath2, err = GetModulePath("github.com/goradd/gofile", modules)
+	if err != nil {
+		t.Fatal(err)
+		return
+	}
+	if filepath.Join(newPath2, "/*/modules") != newPath {
+		t.Error("Module path is not rooted")
 	}
 }
 
@@ -63,7 +84,7 @@ func TestSplitCommandParts(t *testing.T) {
 }
 
 func TestExecuteShellCommand(t *testing.T) {
-	_,err := ExecuteShellCommand(`abc "`)
+	_, err := ExecuteShellCommand(`abc "`)
 	if err == nil {
 		t.Error("error expected")
 	}
