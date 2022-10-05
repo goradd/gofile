@@ -112,10 +112,13 @@ func ModulePaths() (ret map[string]string, err error) {
 }
 
 // GetModulePath compares the given path with the list of modules and if the path begins with a module name, it will
-// substitute the absolute path for the module name. It will clean the path given as well.
+// substitute the absolute path for the module name.
 // modules is the output from ModulePaths. Module paths always use forward slashes. The resulting
 // path uses the native path separator.
+//
+// If the path is not a module path, the path will be returned unchanged.
 func GetModulePath(path string, modules map[string]string) (newPath string, err error) {
+	newPath = path
 	for modPath, dir := range modules {
 		if len(modPath) <= len(path) && path[:len(modPath)] == modPath { // if the path starts with a module path, replace it with the actual directory
 			if dir == "" {
@@ -123,10 +126,10 @@ func GetModulePath(path string, modules map[string]string) (newPath string, err 
 					"Install the module again using go get -u %[1]s", modPath)
 			}
 			path = filepath.Join(dir, path[len(modPath):])
+			newPath = filepath.FromSlash(path)
 			break
 		}
 	}
 
-	newPath = filepath.FromSlash(path)
 	return
 }
