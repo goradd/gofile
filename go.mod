@@ -1,6 +1,6 @@
 module github.com/goradd/gofile
 
-require github.com/spf13/cobra v1.5.0
+require github.com/spf13/cobra v1.6.0
 
 require github.com/andybalholm/brotli v1.0.4
 

@@ -29,6 +29,12 @@ gofile will copy the README.md file from /proj-src to the /a/b/ directory.
 
 Gofile exports the ModulePaths() function as a library so you can build your own module aware tools. 
 
+When specifying files using glob patterns (i.e *.txt), surround the file specifier with quotes
+so that gofile will process the pattern rather than the operating system.
+
+`
+gofile remove "github.com/myproj/proj/*.tmp"
+`
 ## Installation
 
 ```shell

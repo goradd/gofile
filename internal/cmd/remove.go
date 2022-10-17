@@ -11,7 +11,14 @@ import (
 	"github.com/spf13/cobra"
 )
 
-func removeFiles(_ *cobra.Command, _ []string) error {
+func removeFiles(cmd *cobra.Command, args []string) error {
+	if len(files) == 0 {
+		if verbose {
+			fmt.Printf("No source files were specified in a remove operation.")
+		}
+		return nil
+	}
+
 	for _, f := range files {
 		err := os.RemoveAll(f)
 		if err != nil {
