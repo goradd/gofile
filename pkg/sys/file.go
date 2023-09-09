@@ -7,6 +7,7 @@ package sys
 import (
 	"fmt"
 	"io"
+	"log"
 	"os"
 	"path/filepath"
 	"runtime"
@@ -187,10 +188,13 @@ func CopyFiles(dst string, overwrite CopyOverwriteType, src ...string) (err erro
 }
 
 // copyFileTo copies the given file to the destination directory.
+//
 // If a name is given, it will rename the file.
 // It does no checks to see if the destination directory exists.
 // overwrite would prevent the file from being copied, then the copy does not happen and
 // error is nil.
+//
+// Successful copy operations are logged to the default logger.
 func copyFileTo(src string, destDir string, name string, overwrite CopyOverwriteType) error {
 	srcInfo, srcErr := os.Stat(src)
 	if srcErr != nil {
@@ -245,11 +249,17 @@ func copyFileTo(src string, destDir string, name string, overwrite CopyOverwrite
 
 	_, err = io.Copy(to, from)
 	if err != nil {
-		//to.Close()
 		return err
 	}
 
-	return to.Close()
+	err = to.Close()
+	if err != nil {
+		return err
+	}
+
+	log.Printf("Copied %s to %s\n", src, destName)
+
+	return nil
 }
 
 // copyTo copies the src to the destination directory. The source can be a file or directory.
@@ -409,7 +419,7 @@ func CopyDirectoryEx(src, dst string, overwrite CopyOverwriteType, excludes []st
 	return
 }
 
-// copyTo copies the src to the destination directory. The source can be a file or directory.
+// copyToEx copies the src to the destination directory. The source can be a file or directory.
 // if a name is specified, src must be a file. The name will be the name of the file in the new directory.
 func copyToEx(src string, destDir string, name string, overwrite CopyOverwriteType, excludes []string) error {
 	srcInfo, srcErr := os.Stat(src)

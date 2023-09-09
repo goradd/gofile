@@ -5,8 +5,8 @@
 package cmd
 
 import (
-	"fmt"
 	"io/fs"
+	"log"
 	"os"
 	"path/filepath"
 
@@ -203,7 +203,7 @@ func processFileArg(arg string) string {
 	arg2 = filepath.FromSlash(arg2)
 
 	if verbose && arg2 != arg {
-		fmt.Printf("module path " + arg + " found at " + arg2)
+		log.Printf("Module path " + arg + " found at " + arg2 + "\n")
 	}
 	return arg2
 }
