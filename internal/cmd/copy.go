@@ -6,6 +6,8 @@ package cmd
 
 import (
 	"fmt"
+	"io"
+	"log"
 
 	"github.com/goradd/gofile/pkg/sys"
 	"github.com/spf13/cobra"
@@ -34,12 +36,15 @@ func copyFiles(cmd *cobra.Command, args []string) error {
 		return nil
 	}
 
+	if !verbose {
+		log.SetOutput(io.Discard)
+	}
+
 	err := sys.CopyFilesEx(dest, overwrite, excludes, files...)
 
 	if err != nil {
 		return err
-	} else if verbose {
-		fmt.Printf("Copied %v to %s\n", args, dest)
 	}
+
 	return nil
 }

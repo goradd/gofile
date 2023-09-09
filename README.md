@@ -1,14 +1,14 @@
-![Build Status](https://img.shields.io/github/workflow/status/goradd/gofile/Go)
+![Build Status](https://img.shields.io/github/actions/workflow/status/goradd/gofile/go.yml?branch=main)
 # gofile
 
-Gofile is a go module aware file and directory manipulation tool primarily useful for building go applications and libraries. 
+gofile is a go module aware file and directory manipulation tool primarily useful for building go applications and libraries. 
 
 Any directory can be represented as a module name,
 followed by a subdirectory and the real path of the module will be substituted for 
 the module name. Path names should use forward slashes to separate directories, and you can substitute 
 environment variables into the path names using $VAR, or ${VAR} syntax.
 
-Gofile is particularly useful for making build scripts for cross-platform projects. The cross-platform feature allows
+gofile is particularly useful for making build scripts for cross-platform projects. The cross-platform feature allows
 you to create command-line scripts that will work on Windows and Unix based systems. The module aware feature
 allows you to specify a path relative to a module's location, simply by starting the path with the module specifier.
 
@@ -27,7 +27,7 @@ gofile copy github.com/myproj/proj/README.md /a/b/
 
 gofile will copy the README.md file from /proj-src to the /a/b/ directory.
 
-Gofile exports the ModulePaths() function as a library so you can build your own module aware tools. 
+gofile exports the ModulePaths() function as a library so you can build your own module aware tools. 
 
 When specifying files using glob patterns (i.e *.txt), surround the file specifier with quotes
 so that gofile will process the pattern rather than the operating system.
