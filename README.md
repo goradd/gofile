@@ -38,7 +38,7 @@ gofile remove "github.com/myproj/proj/*.tmp"
 ## Installation
 
 ```shell
-go get -u github.com/goradd/gofile/...
+go install github.com/goradd/gofile@latest
 ```
 
 ## Usage
