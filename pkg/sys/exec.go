@@ -133,3 +133,52 @@ func GetModulePath(path string, modules map[string]string) (newPath string, err 
 
 	return
 }
+
+// ImportPath will convert a path to a go source file to the equivalent module oriented import path.
+// This is useful for doing code generation to convert relative paths to absolute module paths, since
+// go does not support relative import paths.
+func ImportPath(fp string) (importPath string, err error) {
+	fp, err = filepath.Abs(fp)
+	if err != nil {
+		return
+	}
+	parentDir := filepath.Dir(fp)
+
+	// Run `go list` to get the module root and path
+	cmd := exec.Command("go", "list", "-m", "-f", "{{.Path}}")
+	cmd.Dir = parentDir
+	var out bytes.Buffer
+	cmd.Stdout = &out
+	cmd.Stderr = &out
+	if err = cmd.Run(); err != nil {
+		return
+	}
+
+	modulePaths := strings.Fields(out.String())
+
+	// Run `go list` again to find the module's directory
+	cmd = exec.Command("go", "list", "-m", "-f", "{{.Dir}}")
+	cmd.Dir = parentDir
+	out.Reset()
+	cmd.Stdout = &out
+	cmd.Stderr = &out
+	if err = cmd.Run(); err != nil {
+		return
+	}
+
+	moduleDirs := strings.Fields(out.String())
+
+	// Find the dir that matches our own directory
+	for i, moduleDir := range moduleDirs {
+		if strings.HasPrefix(fp, moduleDir) {
+			var relativePath string
+			relativePath, err = filepath.Rel(moduleDir, parentDir)
+			if err != nil {
+				return
+			}
+			importPath = filepath.ToSlash(filepath.Join(modulePaths[i], relativePath))
+			return
+		}
+	}
+	return
+}

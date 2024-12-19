@@ -89,3 +89,29 @@ func TestExecuteShellCommand(t *testing.T) {
 		t.Error("error expected")
 	}
 }
+
+func TestImportPath(t *testing.T) {
+	modules, err := ModulePaths()
+	if err != nil {
+		t.Fatal(err)
+		return
+	}
+
+	var newPath string
+	newPath, err = GetModulePath("github.com/goradd/gofile/pkg/sys/testdata", modules)
+	if err != nil {
+		t.Fatal(err)
+		return
+	}
+
+	var s string
+	s, err = ImportPath(filepath.Join(newPath, "t1.txt"))
+	if err != nil {
+		t.Fatal(err)
+		return
+	}
+	if s != "github.com/goradd/gofile/pkg/sys/testdata" {
+		t.Error("ImportPath is not correct.")
+		return
+	}
+}
