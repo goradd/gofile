@@ -6,7 +6,6 @@ package sys
 
 import (
 	"fmt"
-	"github.com/stretchr/testify/assert"
 	"path/filepath"
 	"testing"
 )
@@ -107,6 +106,12 @@ func TestImportPath(t *testing.T) {
 
 	var s string
 	s, err = ImportPath(filepath.Join(newPath, "t1.txt"))
-	assert.NoError(t, err)
-	assert.Equal(t, "github.com/goradd/gofile/pkg/sys/testdata", s)
+	if err != nil {
+		t.Fatal(err)
+		return
+	}
+	if s != "github.com/goradd/gofile/pkg/sys/testdata" {
+		t.Error("ImportPath is not correct.")
+		return
+	}
 }
