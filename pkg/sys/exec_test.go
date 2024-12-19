@@ -6,6 +6,7 @@ package sys
 
 import (
 	"fmt"
+	"github.com/stretchr/testify/assert"
 	"path/filepath"
 	"testing"
 )
@@ -88,4 +89,24 @@ func TestExecuteShellCommand(t *testing.T) {
 	if err == nil {
 		t.Error("error expected")
 	}
+}
+
+func TestImportPath(t *testing.T) {
+	modules, err := ModulePaths()
+	if err != nil {
+		t.Fatal(err)
+		return
+	}
+
+	var newPath string
+	newPath, err = GetModulePath("github.com/goradd/gofile/pkg/sys/testdata", modules)
+	if err != nil {
+		t.Fatal(err)
+		return
+	}
+
+	var s string
+	s, err = ImportPath(filepath.Join(newPath, "t1.txt"))
+	assert.NoError(t, err)
+	assert.Equal(t, "github.com/goradd/gofile/pkg/sys/testdata", s)
 }
