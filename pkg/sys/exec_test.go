@@ -114,4 +114,15 @@ func TestImportPath(t *testing.T) {
 		t.Error("ImportPath is not correct.")
 		return
 	}
+
+	s, err = ImportPath(newPath)
+	if err != nil {
+		t.Fatal(err)
+		return
+	}
+	if s != "github.com/goradd/gofile/pkg/sys/testdata" {
+		t.Error("ImportPath is not correct.")
+		return
+	}
+
 }

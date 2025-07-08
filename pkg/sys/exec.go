@@ -9,6 +9,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"os"
 	"os/exec"
 	"path/filepath"
 	"strings"
@@ -137,12 +138,29 @@ func GetModulePath(path string, modules map[string]string) (newPath string, err 
 // ImportPath will convert a path to a go source file to the equivalent module oriented import path.
 // This is useful for doing code generation to convert relative paths to absolute module paths, since
 // go does not support relative import paths.
+// fp can be a directory, in which case it will be treated as a path to a package that you want the import path for.
+// This can be a lengthy process, so minimize the number of times you call this.
 func ImportPath(fp string) (importPath string, err error) {
 	fp, err = filepath.Abs(fp)
 	if err != nil {
 		return
 	}
-	parentDir := filepath.Dir(fp)
+	var parentDir string
+	if IsDir(fp) {
+		parentDir = fp
+	} else {
+		parentDir = filepath.Dir(fp)
+	}
+	var oldWd string
+	oldWd, err = os.Getwd()
+	if err != nil {
+		return
+	}
+	err = os.Chdir(parentDir)
+	if err != nil {
+		return
+	}
+	defer func() { err = os.Chdir(oldWd) }()
 
 	// Run `go list` to get the module root and path
 	cmd := exec.Command("go", "list", "-m", "-f", "{{.Path}}")
